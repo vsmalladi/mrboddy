@@ -8,27 +8,27 @@ class Player(object):
         self.inplay = True
         self.hand = {}
     
-    def return_character(self):
+    def get_character(self):
         """
-        Returns the players character
+        Returns the player's character
         """
         return self.character
     
-    def return_position(self):
+    def get_position(self):
         """
-        Returns the players position
+        Returns the player's position
         """
         return self.position
     
     def update_position(self,new_position):
         """
-        Updates the players position
+        Updates the player's position
         """
         self.position = new_position
     
-    def return_hand(self):
+    def get_hand(self):
         """
-        Returns the cards in the players hand
+        Returns the cards in the player's hand
         """
         return self.hand
     
@@ -47,18 +47,18 @@ class Player(object):
             return True #Should most likley make a game object that will change the game variable instead of this method
         else:
             self.inplay = False
-            print "You're guess was incorrect"
+            print "Your guess was incorrect"
             return "It was not %s in the %s with the %s" % (suspect,room,weapon)
     
     def make_suggestion(self,suspect,case):
         """
-        User makes a suggestion that other's can disprove
+        User makes a suggestion that others can disprove
         """
         pass
     
     def reveal_card(self,card_name):
         """
-        Player reveals a particular card to disprove some's suggestion
+        Player reveals a particular card to disprove some suggestion
         """
         return self.hand[card_name]
         
