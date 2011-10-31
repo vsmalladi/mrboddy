@@ -8,12 +8,15 @@ class Player(object):
         self.inplay = True
         self.hand = {}
     
+
+    @property
     def get_character(self):
         """
         Returns the player's character
         """
         return self.character
     
+    @property
     def get_position(self):
         """
         Returns the player's position
@@ -26,6 +29,8 @@ class Player(object):
         """
         self.position = new_position
     
+
+    @property
     def get_hand(self):
         """
         Returns the cards in the player's hand
@@ -49,6 +54,13 @@ class Player(object):
             self.inplay = False
             print "Your guess was incorrect"
             return "It was not %s in the %s with the %s" % (suspect,room,weapon)
+    
+    @property
+    def inplay(self):
+        """
+        Returns if the player is still in play and hasn't made an incorrect accusation
+        """
+        return self.inplay
     
     def make_suggestion(self,suspect,case):
         """
