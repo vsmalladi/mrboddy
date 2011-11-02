@@ -4,7 +4,7 @@ class Player(object):
     
     def __init__(self):
         self.character = None
-        self.position = 'Start'
+        self.position = "Start"
         self.inplay = True
         self.hand = {}
     
@@ -56,7 +56,7 @@ class Player(object):
             return "It was not %s in the %s with the %s" % (suspect,room,weapon)
     
     @property
-    def inplay(self):
+    def return_player_status(self):
         """
         Returns if the player is still in play and hasn't made an incorrect accusation
         """
