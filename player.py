@@ -37,11 +37,6 @@ class Player(object):
         """
         return self.hand
     
-    def move(self):
-        """
-        Function that allows player to move
-        """
-        pass
     
     def make_accusation(self,suspect,room,weapon,case):
         """
