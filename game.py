@@ -28,7 +28,7 @@ class Game(object):
         return card
     
     
-    def get_case(self):
+    def create_case(self):
         """
         Returns case dictionary including the suspect, weapon, and room
         """
@@ -73,7 +73,7 @@ class Game(object):
         Initializes game
         """
         self.players = players
-        self.case_file = self.get_case()
+        self.case_file = self.create_case()
         self._card_list = self.make_card_list(self.case_file)
         
         for player in self.players:
@@ -88,14 +88,14 @@ class Game(object):
 
     
     @property
-    def return_case(self):
+    def get_case(self):
         """
         Returns the case file
         """
         return self.case_file
     
     @property
-    def return_active_player(self):
+    def get_active_player(self):
         """
         Returns the active player
         """
@@ -129,4 +129,5 @@ class Game(object):
         Not sure how get the board
         """
         pass
+        
     

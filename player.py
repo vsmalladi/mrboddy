@@ -37,12 +37,6 @@ class Player(object):
         """
         return self.hand
     
-    def move(self):
-        """
-        Function that allows player to move
-        """
-        pass
-    
     def make_accusation(self,suspect,room,weapon,case):
         """
         Checks if accusation is within case file
@@ -56,7 +50,7 @@ class Player(object):
             return "It was not %s in the %s with the %s" % (suspect,room,weapon)
     
     @property
-    def return_player_status(self):
+    def get_player_status(self):
         """
         Returns if the player is still in play and hasn't made an incorrect accusation
         """
