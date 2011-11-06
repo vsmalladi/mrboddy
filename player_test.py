@@ -7,23 +7,27 @@ class PlayerTestCase(unittest.TestCase):
     
     def setUp(self):
         """ Sets up test senario """
-        self.player = Player()
+        self.player = Player("Venkat")
         self.player.character = "Miss Scarlet"
         self.player.position = "Hall"
         self.player.hand = {"Rope":"Rope","Knife":"Knife","Kitchen":"Kitchen","Ballroom":"Ballroom"}
         self.case_file = {"Suspect":"Prof. Plum","Weapon":"Rope","Room":"Hall"}
-        
-    def test_return_character(self):
-        """ Tests to see if player class returns Character """
-        self.player.character
     
-    def test_return_position(self):
+    def test_get_name(self):
+        """ Tests to see if player class resutns Name """
+        self.player.get_name
+        
+    def test_get_character(self):
+        """ Tests to see if player class returns Character """
+        self.player.get_character
+    
+    def test_get_position(self):
         """ Tests to see if player class returns Position """
-        self.player.position
+        self.player.get_position
         
     def test_return_hand(self):
         """ Tests to see if player class returns hand """
-        self.player.hand
+        self.player.get_hand
     
     def test_reveal_card(self):
         """ Tests to see if player class can revel card from hand"""
@@ -34,7 +38,7 @@ class PlayerTestCase(unittest.TestCase):
         self.player.update_position("Ballroom")
         self.player.position
         
-    def test_accusation(self):
+    def test_make_accusation(self):
         """ Tests to see if player class can make accusation """
         negative_guess = self.player.make_accusation("Mr.Green","Hall","Rope",self.case_file)
         positive_guess = self.player.make_accusation("Prof. Plum","Hall","Rope",self.case_file)

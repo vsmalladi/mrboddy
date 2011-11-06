@@ -2,12 +2,19 @@
 
 class Player(object):
     
-    def __init__(self):
+    def __init__(self,name):
         self.character = None
         self.position = "Start"
         self.inplay = True
         self.hand = {}
+        self.name = name
     
+    @property
+    def get_name(self):
+        """
+        Returns the player's name
+        """
+        return self.name
 
     @property
     def get_character(self):
