@@ -21,7 +21,7 @@ class Board(object):
         
     def get_player_location(self, player):
         
-        return player.get_position()
+        return player.get_position
         
     
     def set_player_location(self, player, room):
@@ -38,7 +38,7 @@ class Board(object):
     
     def get_player_list(self):
         
-        return self.player_locations;    
+        return self.player_locations    
     
                 
     def get_weapon_location(self, weapon):
@@ -64,6 +64,6 @@ class Board(object):
             print("The " & weapon & " is not in a room yet.")
             
     def get_rooms(self):
-        return self.rooms;
+        return self.rooms
             
             
