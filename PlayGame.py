@@ -8,7 +8,7 @@ import game;
 
 def main():
     
-   current_game = game()
+   current_game = Game()
    #get the number of players and set up characters
    current_game.initialize()
    #gameplay loop
