@@ -44,17 +44,6 @@ class Player(object):
         """
         return self.hand
     
-    def make_accusation(self,suspect,room,weapon,case):
-        """
-        Checks if accusation is within case file
-        """
-        if (suspect == case["Suspect"]) and (room == case["Room"]) and (weapon == case["Weapon"]):
-            print "You are correct. You have won"
-            return True #Should most likley make a game object that will change the game variable instead of this method
-        else:
-            self.inplay = False
-            print "Your guess was incorrect"
-            return "It was not %s in the %s with the %s" % (suspect,room,weapon)
     
     @property
     def get_player_status(self):

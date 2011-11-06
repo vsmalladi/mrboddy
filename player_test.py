@@ -37,11 +37,6 @@ class PlayerTestCase(unittest.TestCase):
         """ Tests to see if player class can update position"""
         self.player.update_position("Ballroom")
         self.player.position
-        
-    def test_make_accusation(self):
-        """ Tests to see if player class can make accusation """
-        negative_guess = self.player.make_accusation("Mr.Green","Hall","Rope",self.case_file)
-        positive_guess = self.player.make_accusation("Prof. Plum","Hall","Rope",self.case_file)
 
 if __name__ == '__main__':
     unittest.main()
