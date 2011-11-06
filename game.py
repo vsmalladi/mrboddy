@@ -5,6 +5,7 @@ from random import randrange
 from random import shuffle
 from string import *
 from player import Player
+from board import Board
 
 
 class Game(object):
@@ -75,6 +76,7 @@ class Game(object):
         self.players = players
         self.case_file = self.create_case()
         self._card_list = self.make_card_list(self.case_file)
+        self.active_player = self.players[0]
         
         for player in self.players:
             player.character = self.get_remaining_card(self.characters)
@@ -83,8 +85,6 @@ class Game(object):
             for player in self.players:
                 card = self.get_remaining_card(self._card_list)
                 player.hand[card] = card
-        
-        self.active_player = self.players[0]
 
     
     @property
@@ -99,7 +99,7 @@ class Game(object):
         """
         Returns the active player
         """
-        return self.active_player
+        return self.active_player.get_name
     
     @property
     def get_game_state(self):
@@ -115,8 +115,8 @@ class Game(object):
         player_inplay = False
         while player_inplay == False:    
             try:
-                self.active_player = self.players_list[self.players_list.index(self.active_player) + 1]
-                current_player = self.players[self.players_list.index(self.active_player) + 1]
+                self.active_player = self.players[self.players.index(self.active_player) + 1]
+                current_player = self.players[self.players.index(self.active_player) + 1]
                 player_inplay = current_player.inplay
             except IndexError:
                 self.active_player = player = self.players[0]
@@ -126,8 +126,9 @@ class Game(object):
     
     def get_board(self):
         """
-        Not sure how get the board
+        Initialize the game board
         """
+        self.board = Board()
         pass
         
     

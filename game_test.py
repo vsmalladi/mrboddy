@@ -9,9 +9,9 @@ class GameTestCase(unittest.TestCase):
     def setUp(self):
         """Sets up test senario"""
         self.game = Game()
-        Player1 = Player()
-        Player2 = Player()
-        Player3 = Player()
+        Player1 = Player("Player1")
+        Player2 = Player("Player2")
+        Player3 = Player("Player3")
         self.players = [Player1,Player2,Player3]
         
     def test_get_card(self):
@@ -21,16 +21,16 @@ class GameTestCase(unittest.TestCase):
     
     def test_get_case(self):
         """ Tests to see if case file can be made"""
-        self.game.get_case()
+        self.game.create_case()
     
     def test_make_card_list(self):
         """ Tests to see if list of cards not in case file can be made """
-        case = self.game.get_case()
+        case = self.game.create_case()
         self.game.make_card_list(case)
     
     def test_get_remaning_card(self):
         """ Tests to see if the function to get a card from the list of eligible cards"""
-        case = self.game.get_case()
+        case = self.game.create_case()
         card_list = self.game.make_card_list(case)
         self.game.get_remaining_card(card_list)
     
@@ -39,13 +39,14 @@ class GameTestCase(unittest.TestCase):
         self.game.initialize(self.players)
         
 
-    def test_return_case(self):
+    def test_get_case(self):
         """ Tests that case file can be returned """
-        self.game.return_case
+        self.game.get_case
     
-    def test_return_active_player(self):
+    def test_get_active_player(self):
         """ Test that the active player can be returned"""
-        self.game.return_active_player
+        self.game.initialize(self.players)
+        self.game.get_active_player
     
     def test_return_game_state(self):
         """ Tests that the game state can be returned"""
@@ -55,7 +56,7 @@ class GameTestCase(unittest.TestCase):
         """ Tests that the game can move to the next player """
         self.game.initialize(self.players)
         self.game.set_active_player()
-        print self.game.return_active_player
+        self.game.get_active_player
 
 if __name__ == '__main__':
     unittest.main()
