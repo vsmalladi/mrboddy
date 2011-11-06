@@ -76,6 +76,7 @@ class Game(object):
         self.players = players
         self.case_file = self.create_case()
         self._card_list = self.make_card_list(self.case_file)
+        self.game_board = Board()
         self.active_player = self.players[0]
         
         for player in self.players:
@@ -126,9 +127,8 @@ class Game(object):
     
     def get_board(self):
         """
-        Initialize the game board
+        Return the state of the game board
         """
-        self.board = Board()
-        pass
+        return self.game_board
         
     
