@@ -19,7 +19,7 @@ class Game(object):
         self.character_dict = {0 :"Colonel Mustard", 1:"Miss Scarlet", 2:"Prof. Plum", 3:"Mr. Green", 4:"Mrs. White", 5:"Mrs. Peacock"}
         self.weapon_dict = {0 :"Rope", 1:"Lead Pipe", 2:"Knife", 3:"Wrench", 4:"Candlestick", 5:"Pistol"}
         self.room_dict = {0 :"Hall", 1:"Lounge", 2:"Dining Room", 3:"Kitchen", 4:"Ballroom", 5:"Conservatory", 6:"Billiard Room", 7:"Library", 8:"Study"}
-        self.characters = ["Colonel Mustard", "Miss Scarlet", "Prof. Plum","Mr. Green", "Mrs. White", "Mrs. Peacock"]
+        self.characters = ["Miss Scarlet","Colonel Mustard","Mrs. White","Mr. Green","Mrs. Peacock","Prof. Plum"]
         self.suspect = None
         self.room = None
         self.weapon = None
