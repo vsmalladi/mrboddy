@@ -11,7 +11,6 @@ class PlayerTestCase(unittest.TestCase):
         self.player.character = "Miss Scarlet"
         self.player.position = "Hall"
         self.player.hand = {"Rope":"Rope","Knife":"Knife","Kitchen":"Kitchen","Ballroom":"Ballroom"}
-        self.case_file = {"Suspect":"Prof. Plum","Weapon":"Rope","Room":"Hall"}
     
     def test_get_name(self):
         """ Tests to see if player class resutns Name """

@@ -52,11 +52,6 @@ class Player(object):
         """
         return self.inplay
     
-    def make_suggestion(self,suspect,case):
-        """
-        User makes a suggestion that others can disprove
-        """
-        pass
     
     def reveal_card(self,card_name):
         """
