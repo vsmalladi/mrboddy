@@ -167,17 +167,10 @@ class GameRules(object):
             #if the room to be moved to is not a hallway, then
             #it's ok to move there even if it's already occupied
             if self.is_hallway(room_to) == True:
-                return True
+                return empty
             
             else:
-                for rm in player_list:
-                    
-                    if rm == room_to:
-                        players_in_room = self.player_list[rm]
-                    
-                        if players_in_room.len() > 0:
-                            empty = False;
+                if room_to in self.player_list.values():
+                        empty = False
                         
-                        break;
-                
             return empty
