@@ -49,7 +49,7 @@ class BoardTestCase(unittest.TestCase):
     
     def test_display_weapon_location(self):
         """Test if Board class can print the location of a weapon"""
-        self.board.display_weapon_location("Pistol")
+        self.board.display_weapon_location("Pistol") # No location for weapon
         self.board.set_weapon_location("Pistol","Study")
         self.board.display_weapon_location("Pistol")
     
