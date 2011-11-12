@@ -6,7 +6,7 @@ from random import shuffle
 from string import *
 from player import Player
 from board import Board
-
+from gamerules import GameRules
 
 class Game(object):
     
@@ -80,6 +80,7 @@ class Game(object):
         self.case_file = self.create_case()
         self._card_list = self.make_card_list(self.case_file)
         self.game_board = Board()
+        self.gamerules = GameRules()
         self.active_player = self.players[0]
         
         for player in self.players:
@@ -133,5 +134,33 @@ class Game(object):
         Return the state of the game board
         """
         return self.game_board
-        
+    
+    def make_move(self,move_to):
+        """
+        Movement of player
+        """
+        if self.gamerules.is_valid_move(self.game_board,self.active_player,move_to):
+            self.active_player.update_position(move_to)
+            return True
+        else:
+            return False
+
+    
+    def make_suggestion(self,suspect,weapon):
+        """
+        Player makes suggestion
+        """ 
+        pass
+    
+    def make_accusation(self,room,suspect,weapon):
+        """
+        Player makes accusation
+        """
+        if (suspect == case["Suspect"]) and (room == case["Room"]) and (weapon == case["Weapon"]):
+            print "You are correct. You have won"
+            self.game_status = False
+        else:
+            self.active_player.inplay = False
+            print "Your guess was incorrect"
+            return "It was not %s in the %s with the %s" % (suspect,room,weapon)
     

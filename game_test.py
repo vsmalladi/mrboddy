@@ -3,6 +3,8 @@
 import unittest
 from player import Player
 from game import Game
+from board import Board
+from gamerules import GameRules
 
 class GameTestCase(unittest.TestCase):
     
@@ -57,6 +59,14 @@ class GameTestCase(unittest.TestCase):
         self.game.initialize(self.players)
         self.game.set_active_player()
         self.game.get_active_player
+    
+    def test_make_move(self):
+        """ Test that a player can move to a new location """
+        self.game.initialize(self.players)
+        self.game.active_player.position = "Hall"
+        self.game.make_move("Study-Hall")
+        self.assertEquals(self.game.active_player.get_position,"Study-Hall")
+
 
 if __name__ == '__main__':
     unittest.main()
