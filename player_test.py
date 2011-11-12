@@ -14,15 +14,15 @@ class PlayerTestCase(unittest.TestCase):
     
     def test_get_name(self):
         """ Tests to see if player class resutns Name """
-        self.player.get_name
+        self.assertEquals(self.player.get_name,"Venkat")
         
     def test_get_character(self):
         """ Tests to see if player class returns Character """
-        self.player.get_character
+        self.assertEquals(self.player.get_character,"Miss Scarlet")
     
     def test_get_position(self):
         """ Tests to see if player class returns Position """
-        self.player.get_position
+        self.assertEquals(self.player.get_position,"Hall")
         
     def test_return_hand(self):
         """ Tests to see if player class returns hand """
@@ -30,12 +30,12 @@ class PlayerTestCase(unittest.TestCase):
     
     def test_reveal_card(self):
         """ Tests to see if player class can revel card from hand"""
-        self.player.reveal_card("Rope")
+        self.assertEquals(self.player.reveal_card("Rope"),"Rope")
     
     def test_update_position(self):
         """ Tests to see if player class can update position"""
         self.player.update_position("Ballroom")
-        self.player.position
+        self.assertEquals(self.player.position,"Ballroom")
 
 if __name__ == '__main__':
     unittest.main()

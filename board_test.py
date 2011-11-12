@@ -36,7 +36,7 @@ class BoardTestCase(unittest.TestCase):
     def test_get_weapon_location(self):
         """Test if Board class can return location of a weapon"""
         self.board.set_weapon_location("Lead Pipe","Study")
-        self.board.get_weapon_location("Lead Pipe")
+        self.assertEqual(self.board.get_weapon_location("Lead Pipe"),"Study")
     
     def test_get_rooms(self):
         """Test if Board class can return the list of rooms"""
