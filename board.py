@@ -41,16 +41,17 @@ class Board(object):
     
     def display_player_location(self, player):
         
-        print(player.get_character() & " is in the " & player.get_position())
+        print("%s is in the %s" % (player.get_character, player.get_position))
         
     
     def display_weapon_location(self, weapon):
         
-        if self.weapon_locations[weapon].value() != None:
-            print("The " & weapon & " is in the " & self.get_weapon_location(weapon))
+        if self.weapon_locations[weapon] != None:
+            print("The %s is in the %s " % (weapon,self.get_weapon_location(weapon)))
         else:
-            print("The " & weapon & " is not in a room yet.")
-            
+            print("The %s is not in a room yet." % (weapon))
+    
+    @property
     def get_rooms(self):
         return self.rooms
             
