@@ -5,17 +5,17 @@
 class GameRules(object):
    
         def __init__(self):
-            self.rooms
-            self.player_list
+            self.rooms = []
+            self.player_list = {}
  
         def is_valid_move(self, board, player, room_to):
             
             room_from = board.get_player_location(player)
-            self.rooms = board.get_rooms()
+            self.rooms = board.get_rooms
             self.player_list = board.get_player_list;
             
             #if the room is empty and doesn't have someone in it, the move is valid
-            if self.is_adjacent(room_to, room_from) and  self.is_empty_room(room_to):
+            if self.is_adjacent_to(room_to, room_from) and  self.is_empty_room(room_to):
                 return True
             else:
                 return False
@@ -25,7 +25,7 @@ class GameRules(object):
             
             #from study to study-hall, study-library, or kitchen
             if room_from == self.rooms[0]:
-                if room_to == self.rooms[1] or room_to == self.rooms[2] or room_to == self.rooms[3]:
+                if room_to == self.rooms[1] or room_to == self.rooms[2] or room_to == self.rooms[3] or room_to == self.rooms[20]:
                     return True
             
             #from study-hall to study or hall
@@ -162,11 +162,10 @@ class GameRules(object):
         def is_empty_room(self, room_to):
             
             empty = True
-            players_in_room = []
             
             #if the room to be moved to is not a hallway, then
             #it's ok to move there even if it's already occupied
-            if self.is_hallway(room_to) == True:
+            if self.is_hallway(room_to) == False:
                 return empty
             
             else:
