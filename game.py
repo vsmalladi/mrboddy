@@ -23,6 +23,7 @@ class Game(object):
         self.suspect = None
         self.room = None
         self.weapon = None
+        self.num_players = 0
     
     def get_card(self,card_dict):
         """
@@ -127,7 +128,12 @@ class Game(object):
                 self.active_player = player = self.players[0]
                 current_player = self.players[0]
                 player_inplay = current_player.inplay
-                
+    
+    def add_player(self, incr_player):
+        self.num_players += 1
+    
+    def get_num_players(self):
+        return self.num_players
     
     def get_board(self):
         """
