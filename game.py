@@ -7,6 +7,7 @@ from string import *
 from player import Player
 from board import Board
 from gamerules import GameRules
+import os
 
 class Game(object):
     
@@ -24,6 +25,7 @@ class Game(object):
         self.room = None
         self.weapon = None
         self.num_players = 0
+        self.turn_tracker = None #flatfile to track turns in place of a database
     
     def get_card(self,card_dict):
         """
@@ -73,6 +75,17 @@ class Game(object):
         card = card_list.pop(randrange(0,len(card_list)))
         return card
     
+    def update_turntracker(self, player):
+        """
+        Updates a flatfile to use to track whose turn it is
+        
+        May need to update this to incorporate authentication (pyramid_who)
+        """
+        self.turn_tracker = open('turn', 'w')
+        self.turn_tracker.write(player.character)
+        self.turn_tracker.close()
+        
+        
     def initialize(self,players):
         """
         Initializes game
@@ -119,16 +132,22 @@ class Game(object):
         Set the next active player
         """
         player_inplay = False
+        
         while player_inplay == False:    
             try:
                 self.active_player = self.players[self.players.index(self.active_player) + 1]
                 current_player = self.players[self.players.index(self.active_player) + 1]
                 player_inplay = current_player.inplay
+                
             except IndexError:
                 self.active_player = player = self.players[0]
                 current_player = self.players[0]
                 player_inplay = current_player.inplay
     
+        #update turn tracker
+        update_turntracker(self.active_player.character)
+        
+        
     def add_player(self, incr_player):
         self.num_players += 1
     
