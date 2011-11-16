@@ -26,6 +26,9 @@ class Game(object):
         self.weapon = None
         self.num_players = 0
         self.turn_tracker = None #flatfile to track turns in place of a database
+        self.tracker_name = "turn"
+        self.game_board = None
+    
     
     def get_card(self,card_dict):
         """
@@ -75,16 +78,55 @@ class Game(object):
         card = card_list.pop(randrange(0,len(card_list)))
         return card
     
+    
     def update_turntracker(self, player):
         """
         Updates a flatfile to use to track whose turn it is
         
         May need to update this to incorporate authentication (pyramid_who)
         """
-        self.turn_tracker = open('turn', 'w')
-        self.turn_tracker.write(player.character)
-        self.turn_tracker.close()
+        try:
+            self.turn_tracker = open(self.tracker_name, 'w')
+            self.turn_tracker.write(player.character)
+            self.turn_tracker.close()
+        except IOError:
+            return false
         
+        return true
+    
+        
+    def create_turntracker(self, player):
+        
+        try:
+            if path.exists(self.tracker_name):
+                print("A game is already in progress. Please try again later.")
+        except IOError:
+            return false    
+            
+        return true
+        
+    
+    def cleanup(self):
+        """
+        Remove turn tracker at end of game
+        """
+        
+        try:
+            remove(turn_tracker)
+        except IOError:
+            print "Something went wrong cleaning up the game"
+            return false
+        
+        return true
+    
+    
+    def read_truntracker(self):
+        """
+        Get the current player
+        """
+        
+        pass
+    
         
     def initialize(self,players):
         """
@@ -113,6 +155,7 @@ class Game(object):
         """
         return self.case_file
     
+    
     @property
     def get_active_player(self):
         """
@@ -120,12 +163,14 @@ class Game(object):
         """
         return self.active_player.get_name
     
+    
     @property
     def get_game_state(self):
         """
         Returns the state of the game
         """
         return self.game_status
+    
     
     def set_active_player(self):
         """
@@ -145,27 +190,24 @@ class Game(object):
                 player_inplay = current_player.inplay
     
         #update turn tracker
-        update_turntracker(self.active_player.character)
+        if not (update_turntracker(self.active_player.character)):
+            print("Error") #need to decide what to do here
         
         
     def add_player(self, incr_player):
         self.num_players += 1
     
+    
     def get_num_players(self):
         return self.num_players
     
-    def get_board(self):
-        """
-        Return the state of the game board
-        """
-        return self.game_board
     
     def make_move(self,move_to):
         """
-        Movement of player
+        Movement of player 
         """
         if self.gamerules.is_valid_move(self.game_board,self.active_player,move_to):
-            self.active_player.update_position(move_to)
+            game_board.set_player_location(active_player, move_to)
             return True
         else:
             return False
@@ -176,6 +218,7 @@ class Game(object):
         Player makes suggestion
         """ 
         pass
+    
     
     def make_accusation(self,room,suspect,weapon):
         """

@@ -54,5 +54,7 @@ class Board(object):
     @property
     def get_rooms(self):
         return self.rooms
-            
-            
+    
+    
+    def get_board(self):        
+        return self        
