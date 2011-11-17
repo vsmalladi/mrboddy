@@ -15,22 +15,24 @@ class Game(object):
     def __init__(self):
         self.case_file = {}
         self.active_player = None
-        self.game_status = True
+        self.__game_status = False
         self.players = []
-        self.character_dict = {0 :"Colonel Mustard", 1:"Miss Scarlet", 2:"Prof. Plum", 3:"Mr. Green", 4:"Mrs. White", 5:"Mrs. Peacock"}
-        self.weapon_dict = {0 :"Rope", 1:"Lead Pipe", 2:"Knife", 3:"Wrench", 4:"Candlestick", 5:"Pistol"}
-        self.room_dict = {0 :"Hall", 1:"Lounge", 2:"Dining Room", 3:"Kitchen", 4:"Ballroom", 5:"Conservatory", 6:"Billiard Room", 7:"Library", 8:"Study"}
-        self.characters = ["Miss Scarlet","Colonel Mustard","Mrs. White","Mr. Green","Mrs. Peacock","Prof. Plum"]
+        self.__character_dict = {0 :"Colonel Mustard", 1:"Miss Scarlet", 2:"Prof. Plum", 3:"Mr. Green", 4:"Mrs. White", 5:"Mrs. Peacock"}
+        self.__weapon_dict = {0 :"Rope", 1:"Lead Pipe", 2:"Knife", 3:"Wrench", 4:"Candlestick", 5:"Pistol"}
+        self.__room_dict = {0 :"Hall", 1:"Lounge", 2:"Dining Room", 3:"Kitchen", 4:"Ballroom", 5:"Conservatory", 6:"Billiard Room", 7:"Library", 8:"Study"}
+        self.__characters = ["Miss Scarlet","Colonel Mustard","Mrs. White","Mr. Green","Mrs. Peacock","Prof. Plum"]
         self.suspect = None
         self.room = None
         self.weapon = None
-        self.num_players = 0
-        self.turn_tracker = None #flatfile to track turns in place of a database
-        self.tracker_name = "turn"
+        self.__num_players = 0
+        self.__turn_tracker = None #flatfile to track turns in place of a database
+        self.__tracker_name = "turn"
         self.game_board = None
+        self.user_tracker = None #flatfile to track number of users playing
+        self.user_tracker_name = "users"
+        self.gamerules = None
     
-    
-    def get_card(self,card_dict):
+    def __get_card(self,card_dict):
         """
         Returns a random card from the card dictionary
         """
@@ -38,31 +40,31 @@ class Game(object):
         return card
     
     
-    def create_case(self):
+    def __create_case(self):
         """
         Returns case dictionary including the suspect, weapon, and room
         """
         case = {}
-        case['Suspect'] = self.get_card(self.character_dict)
-        case['Weapon'] = self.get_card(self.weapon_dict)
-        case['Room'] = self.get_card(self.room_dict)
+        case['Suspect'] = self.__get_card(self.__character_dict)
+        case['Weapon'] = self.__get_card(self.__weapon_dict)
+        case['Room'] = self.__get_card(self.room_dict)
         return case
     
     
-    def make_card_list(self,case):
+    def __make_card_list(self,case):
         """
         Returns suffled list of cards not in case file
         """
         cards = []
-        for value in self.character_dict.values():
+        for value in self.__character_dict.values():
             if value != case['Suspect']:
                 cards.append(value)
         
-        for value in self.weapon_dict.values():
+        for value in self.__weapon_dict.values():
             if value != case['Weapon']:
                 cards.append(value)  
         
-        for value in self.room_dict.values():
+        for value in self.__room_dict.values():
             if value != case['Room']:
                 cards.append(value)
                 
@@ -70,7 +72,7 @@ class Game(object):
         return cards
     
     
-    def get_remaining_card(self,card_list):
+    def __get_remaining_card(self,card_list):
         """
         Returns a random card from the remaing card list and removes
         it from the list
@@ -86,9 +88,9 @@ class Game(object):
         May need to update this to incorporate authentication (pyramid_who)
         """
         try:
-            self.turn_tracker = open(self.tracker_name, 'w')
-            self.turn_tracker.write(player.character)
-            self.turn_tracker.close()
+            self.__turn_tracker = open(self.tracker_name, 'w')
+            self.__turn_tracker.write(player.character)
+            self.__turn_tracker.close()
         except IOError:
             return false
         
@@ -104,15 +106,18 @@ class Game(object):
             return false    
             
         return true
-        
+       
     
     def cleanup(self):
         """
-        Remove turn tracker at end of game
+        Remove turn and user trackers at end of game
         """
         
         try:
-            remove(turn_tracker)
+            self.__turn_tracker.close
+            remove(self.__turn_tracker)
+            self.__user_tracker.close
+            remove(self.__user_tracker)
         except IOError:
             print "Something went wrong cleaning up the game"
             return false
@@ -133,18 +138,18 @@ class Game(object):
         Initializes game
         """
         self.players = players
-        self.case_file = self.create_case()
-        self._card_list = self.make_card_list(self.case_file)
+        self.case_file = self.__create_case()
+        self._card_list = self.__make_card_list(self.case_file)
         self.game_board = Board()
         self.gamerules = GameRules()
         self.active_player = self.players[0]
         
         for player in self.players:
-            player.character = self.get_remaining_card(self.characters)
+            player.character = self.__get_remaining_card(self.characters)
             
         while len(self._card_list) > 0:
             for player in self.players:
-                card = self.get_remaining_card(self._card_list)
+                card = self.__get_remaining_card(self._card_list)
                 player.hand[card] = card
 
     
@@ -169,10 +174,10 @@ class Game(object):
         """
         Returns the state of the game
         """
-        return self.game_status
+        return self.__game_status
     
     
-    def set_active_player(self):
+    def __set_active_player(self):
         """
         Set the next active player
         """
@@ -194,12 +199,44 @@ class Game(object):
             print("Error") #need to decide what to do here
         
         
-    def add_player(self, incr_player):
-        self.num_players += 1
-    
+    def add_player(self, player_name):
+        
+        """
+        This function should be called when a user decides to join the game.
+        """
+        if not path.exists(self.tracker_name):
+            try:
+                self.__user_tracker = open(self.__user_tracker_name, 'r+')
+                
+            except IOError:
+                return false
+        
+        try:
+            np = self.__user_tracker.readline
+            if np != "":
+                self.__num_players = np + 1
+            else:
+                np = 1
+                    
+            self.__user_tracker.write(self.__num_players)
+        
+        except IOError:
+            return false
+        
+        players.add(player_name)
+        
+        return true               
+        
     
     def get_num_players(self):
-        return self.num_players
+        
+        try:
+            self.__num_players = self.__user_tracker.readline
+        
+        except IOError:
+            return None
+        
+        return self.__num_players
     
     
     def make_move(self,move_to):
@@ -217,8 +254,20 @@ class Game(object):
         """
         Player makes suggestion
         """ 
+        print ("Player %s thinks it was %s in the %s with a %s", \
+               (active_player.character, suspect, weapon))
+        
+        #give players the opportunity to disprove the suggestion
+        
+        
+    def disprove_suggestion(self):
+        
+        """
+        I think this will need to be implemented once the interaction
+        once there is a way to interace with the UI
+        """
         pass
-    
+                
     
     def make_accusation(self,room,suspect,weapon):
         """
@@ -226,7 +275,7 @@ class Game(object):
         """
         if (suspect == case["Suspect"]) and (room == case["Room"]) and (weapon == case["Weapon"]):
             print "You are correct. You have won"
-            self.game_status = False
+            self.__game_status = False
         else:
             self.active_player.inplay = False
             print "Your guess was incorrect"
