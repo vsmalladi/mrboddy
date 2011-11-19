@@ -47,7 +47,7 @@ class Game(object):
         case = {}
         case['Suspect'] = self.__get_card(self.__character_dict)
         case['Weapon'] = self.__get_card(self.__weapon_dict)
-        case['Room'] = self.__get_card(self.room_dict)
+        case['Room'] = self.__get_card(self.__room_dict)
         return case
     
     
@@ -145,7 +145,7 @@ class Game(object):
         self.active_player = self.players[0]
         
         for player in self.players:
-            player.character = self.__get_remaining_card(self.characters)
+            player.character = self.__get_remaining_card(self.__characters)
             
         while len(self._card_list) > 0:
             for player in self.players:
@@ -244,7 +244,7 @@ class Game(object):
         Movement of player 
         """
         if self.gamerules.is_valid_move(self.game_board,self.active_player,move_to):
-            game_board.set_player_location(active_player, move_to)
+            self.game_board.set_player_location(self.active_player, move_to)
             return True
         else:
             return False
