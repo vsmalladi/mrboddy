@@ -21,9 +21,9 @@ class Game(object):
         self.__weapon_dict = {0 :"Rope", 1:"Lead Pipe", 2:"Knife", 3:"Wrench", 4:"Candlestick", 5:"Pistol"}
         self.__room_dict = {0 :"Hall", 1:"Lounge", 2:"Dining Room", 3:"Kitchen", 4:"Ballroom", 5:"Conservatory", 6:"Billiard Room", 7:"Library", 8:"Study"}
         self.__characters = ["Miss Scarlet","Colonel Mustard","Mrs. White","Mr. Green","Mrs. Peacock","Prof. Plum"]
-        self.suspect = None
-        self.room = None
-        self.weapon = None
+        self.suggest_suspect = None
+        self.suggest_room = None
+        self.suggest_weapon = None
         self.__num_players = 0
         self.__turn_tracker = None #flatfile to track turns in place of a database
         self.__tracker_name = "turn"
@@ -252,20 +252,37 @@ class Game(object):
     
     def make_suggestion(self,suspect,weapon):
         """
-        Player makes suggestion
-        """ 
-        print ("Player %s thinks it was %s in the %s with a %s", \
-               (active_player.character, suspect, weapon))
-        
-        #give players the opportunity to disprove the suggestion
-        
-        
-    def disprove_suggestion(self):
-        
+        Player makes a suggestion
         """
-        I think this will need to be implemented once the interaction
-        once there is a way to interace with the UI
+        self.suggest_room = self.active_player.get_position
+        self.suggest_suspect = suspect
+        self.suggest_weapon = weapon
+        
+        print ("Player %s thinks it was %s in the %s with a %s." %\
+               (self.active_player.get_name, self.suggest_suspect, self.suggest_room,self.suggest_weapon))
+        
+    
+    def check_disprove_suggestion(self,player):
         """
+        Checks if a player can disprove a suggestion
+        """
+        if self.suggest_room in player.get_hand.values():
+            return True
+        elif self.suggest_suspect in player.get_hand.values():
+            return True
+        elif self.suggest_weapon in player.get_hand.values():
+            return True
+        else:
+            return False
+        
+        
+    def disprove_suggestion(self,player,):
+        #I think this will need to be implemented once the interaction
+        #once there is a way to interace with the UI
+        """
+        Player can disprove another's suggestion
+        """
+        
         pass
                 
     

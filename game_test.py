@@ -66,6 +66,34 @@ class GameTestCase(unittest.TestCase):
         self.game.active_player.position = "Hall"
         self.game.make_move("Study-Hall")
         self.assertEquals(self.game.active_player.get_position,"Study-Hall")
+    
+    def test_make_suggestion(self):
+        """ Test that a player can make a suggestion """
+        self.game.initialize(self.players)
+        self.game.active_player.position = "Hall"
+        self.game.make_suggestion("Mr. Green","Rope")
+    
+    def test_check_disprove_suggestion(self):
+        """ Test that if a player makes a suggestion, method can check if they can disprove it."""
+        self.game.initialize(self.players)
+        self.game.active_player.position = "Hall"
+        self.game.make_suggestion("Mr. Green","Rope")
+        
+        # Checks that if player doesn't have card returns false
+        self.game.active_player.hand = {"Knife":"Knife"}
+        self.assertFalse(self.game.check_disprove_suggestion(self.game.active_player)) 
+        
+        # Checks that if player does have weapon card
+        self.game.active_player.hand = {"Rope":"Rope"}
+        self.assertTrue(self.game.check_disprove_suggestion(self.game.active_player))
+        
+        # Checks that if player does have suspect card
+        self.game.active_player.hand = {"Mr. Green":"Mr. Green"}
+        self.assertTrue(self.game.check_disprove_suggestion(self.game.active_player))
+        
+        # Checks that if player does have a room card
+        self.game.active_player.hand = {"Hall":"Hall"}
+        self.assertTrue(self.game.check_disprove_suggestion(self.game.active_player))
 
 
 if __name__ == '__main__':
