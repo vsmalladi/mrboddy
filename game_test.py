@@ -71,7 +71,7 @@ class GameTestCase(unittest.TestCase):
         """ Test that a player can make a suggestion """
         self.game.initialize(self.players)
         self.game.active_player.position = "Hall"
-        self.game.make_suggestion("Mr. Green","Rope")
+        self.game.make_suggestion("Mrs. White","Rope")
     
     def test_check_disprove_suggestion(self):
         """ Test that if a player makes a suggestion, method can check if they can disprove it."""
