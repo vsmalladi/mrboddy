@@ -94,6 +94,16 @@ class GameTestCase(unittest.TestCase):
         # Checks that if player does have a room card
         self.game.active_player.hand = {"Hall":"Hall"}
         self.assertTrue(self.game.check_disprove_suggestion(self.game.active_player))
+    
+    def test_available_cards_disprove(self):
+        """ Test that method can return set of cards available in hand that can be used to disprove suggestion"""
+        self.game.initialize(self.players)
+        self.game.active_player.position = "Hall"
+        self.game.make_suggestion("Mr. Green","Rope")
+        self.game.active_player.hand = {"Hall":"Hall","Rope":"Rope","Colonel Mustard":"Colonel Mustard","Lead Pipe":"Lead Pipe"}
+        print self.game.available_cards_disprove(self.game.active_player)
+    
+
 
 
 if __name__ == '__main__':

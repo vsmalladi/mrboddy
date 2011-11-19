@@ -274,17 +274,35 @@ class Game(object):
             return True
         else:
             return False
+    
+    def available_cards_disprove(self,player):
+        """
+        Returns a dict of cards available from a player to
+        disprove a suggestion
+        """
+        can_disprove = {}
+        if self.suggest_room in player.get_hand.values():
+            can_disprove[self.suggest_room] = self.suggest_room
+        
+        if self.suggest_suspect in player.get_hand.values():
+            can_disprove[self.suggest_suspect] = self.suggest_suspect
+        
+        if self.suggest_weapon in player.get_hand.values():
+            can_disprove[self.suggest_weapon] = self.suggest_weapon
+            
+        return can_disprove
         
         
-    def disprove_suggestion(self,player,):
+    def disprove_suggestion(self,player,card):
         #I think this will need to be implemented once the interaction
         #once there is a way to interace with the UI
         """
         Player can disprove another's suggestion
         """
+        print ("Player %s disproved suggestion by revealing %s." %\
+               (player.get_name, player.reveal_card(card)))
         
-        pass
-                
+        return True
     
     def make_accusation(self,room,suspect,weapon):
         """
