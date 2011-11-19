@@ -103,8 +103,18 @@ class GameTestCase(unittest.TestCase):
         self.game.active_player.hand = {"Hall":"Hall","Rope":"Rope","Colonel Mustard":"Colonel Mustard","Lead Pipe":"Lead Pipe"}
         print self.game.available_cards_disprove(self.game.active_player)
     
-
-
+    def test_make_accusation(self):
+        """ Test that if a player makes an accusation """
+        self.game.initialize(self.players)
+        self.game.case_file = {"Suspect":"Mrs. White","Weapon":"Lead Pipe","Room":"Lounge"}
+        
+        #Check that if player is incorrect player's status is set to False
+        self.game.make_accusation("Hall","Colonel Mustard","Lead Pipe")
+        self.assertFalse(self.game.active_player.get_player_status)
+        
+        #Check that a player can accuratley set the status of 
+        self.game.make_accusation("Lounge","Mrs. White","Lead Pipe")
+ 
 
 if __name__ == '__main__':
     unittest.main()

@@ -308,7 +308,7 @@ class Game(object):
         """
         Player makes accusation
         """
-        if (suspect == case["Suspect"]) and (room == case["Room"]) and (weapon == case["Weapon"]):
+        if (suspect == self.case_file["Suspect"]) and (room == self.case_file["Room"]) and (weapon == self.case_file["Weapon"]):
             print "You are correct. You have won"
             self.__game_status = False
         else:
