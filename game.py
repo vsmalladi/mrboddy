@@ -88,13 +88,13 @@ class Game(object):
         May need to update this to incorporate authentication (pyramid_who)
         """
         try:
-            self.__turn_tracker = open(self.tracker_name, 'w')
-            self.__turn_tracker.write(player.character)
+            self.__turn_tracker = open(self.__tracker_name, 'w')
+            self.__turn_tracker.write(player)
             self.__turn_tracker.close()
         except IOError:
-            return false
+            return False
         
-        return true
+        return True
     
         
     def create_turntracker(self, player):
@@ -143,9 +143,10 @@ class Game(object):
         self.game_board = Board()
         self.gamerules = GameRules()
         self.active_player = self.players[0]
+        self.__game_status = True
         
         for player in self.players:
-            player.character = self.__get_remaining_card(self.__characters)
+            player.character = self.__characters.pop(0)
             
         while len(self._card_list) > 0:
             for player in self.players:
@@ -182,23 +183,42 @@ class Game(object):
         Set the next active player
         """
         player_inplay = False
+        current_active = self.active_player.get_name
         
         while player_inplay == False:    
             try:
                 self.active_player = self.players[self.players.index(self.active_player) + 1]
-                current_player = self.players[self.players.index(self.active_player) + 1]
+                current_player = self.players[self.players.index(self.active_player)]
                 player_inplay = current_player.inplay
                 
             except IndexError:
                 self.active_player = player = self.players[0]
                 current_player = self.players[0]
                 player_inplay = current_player.inplay
-    
+            
+            # If loop through all players and no on is active
+            if self.active_player.get_name == current_active:
+                self.__game_status = False
+                print "It was %s in the %s with the %s" % (self.case_file["Suspect"],self.case_file["Room"],self.case_file["Weapon"])
+                print "The Game is Over.Everyone guessed incorrectly"
+                break
+                
         #update turn tracker
-        if not (update_turntracker(self.active_player.character)):
+        if not (self.update_turntracker(self.active_player.character)):
             print("Error") #need to decide what to do here
         
-        
+    def __set_disprove_player_order(self):
+        """
+        Return a list of players in order for disproving a suggestion
+        """
+        disprove_player_list = []
+        if self.players.index(self.active_player) == 0:
+            disprove_player_list = disprove_player_list + self.players[:]
+        else:
+            disprove_player_list = disprove_player_list + self.players[self.players.index(self.active_player):]
+            disprove_player_list = disprove_player_list + self.players[:self.players.index(self.active_player) - 1]
+        return disprove_player_list
+    
     def add_player(self, player_name):
         
         """
@@ -245,8 +265,10 @@ class Game(object):
         """
         if self.gamerules.is_valid_move(self.game_board,self.active_player,move_to):
             self.game_board.set_player_location(self.active_player, move_to)
+            print "%s has moved to %s" % (self.active_player.get_name,move_to)
             return True
         else:
+            print "That is not a valid move."
             return False
 
     
@@ -258,7 +280,13 @@ class Game(object):
         self.suggest_suspect = suspect
         self.suggest_weapon = weapon
         
-        print ("Player %s thinks it was %s in the %s with a %s." %\
+        #Move player's character to new room
+        for p in self.players:
+            if p.get_character == suspect:
+                self.game_board.set_player_location(p,self.suggest_room)
+                print "%s (%s) is now at %s" % (p.get_name,p.get_character,p.get_position)
+        
+        print ("%s thinks it was %s in the %s with a %s." %\
                (self.active_player.get_name, self.suggest_suspect, self.suggest_room,self.suggest_weapon))
         
     
@@ -314,5 +342,53 @@ class Game(object):
         else:
             self.active_player.inplay = False
             print "Your guess was incorrect"
-            return "It was not %s in the %s with the %s" % (suspect,room,weapon)
+            print "It was not %s in the %s with the %s" % (suspect,room,weapon)
     
+    def game_play(self):
+        """
+        This is the main game loop that would be
+        called by playgame moduel
+        """
+        while self.__game_status == True:
+            print "It is %s turn." % (self.active_player.get_name)
+            print "=== Menu ==="
+            print "1. Make Movement"
+            print "2. Make Suggestion"
+            print "3. Make Accusation"
+            print "4. End Turn"
+            
+            user_choice = raw_input("Choose an option from the menu: ")
+            if user_choice == "1":
+                new_room = raw_input("Enter the name of the room you will move to: ")
+                self.make_move(new_room)
+            
+            elif user_choice == "2":
+                suspect = raw_input("Enter a suspect: ")
+                weapon = raw_input("Enter a weapon: ")
+                self.make_suggestion(suspect,weapon)
+                
+                disprove_player_list = self.__set_disprove_player_order()
+
+                for disprove_player in reversed(disprove_player_list):
+                    print disprove_player.get_name
+                    if disprove_player == self.active_player:
+                            print "No one can disprove the suggestion"
+                            break
+                    else:
+                        if self.check_disprove_suggestion(disprove_player) == True:
+                            print self.available_cards_disprove(disprove_player)
+                            card_choosen = raw_input("Enter card to disprove: ")
+                            self.disprove_suggestion(disprove_player,card_choosen)
+                            break
+ 
+            elif user_choice == "3":
+                suspect = raw_input("Enter a suspect: ")
+                weapon = raw_input("Enter a weapon: ")
+                room = raw_input("Enter a room:")
+                self.make_accusation(room,suspect,weapon)
+                self.__set_active_player()
+                
+            elif user_choice == "4":
+                self.__set_active_player()
+            
+            
