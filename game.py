@@ -384,7 +384,7 @@ class Game(object):
             elif user_choice == "3":
                 suspect = raw_input("Enter a suspect: ")
                 weapon = raw_input("Enter a weapon: ")
-                room = raw_input("Enter a room:")
+                room = raw_input("Enter a room: ")
                 self.make_accusation(room,suspect,weapon)
                 self.__set_active_player()
                 
