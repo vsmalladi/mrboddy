@@ -6,6 +6,11 @@ production.ini
 setup.cfg
 setup.py
 boddyinc/__init__.py
+boddyinc/board.py
+boddyinc/game.py
+boddyinc/gamerules.py
+boddyinc/player.py
+boddyinc/playgame.py
 boddyinc/resources.py
 boddyinc/tests.py
 boddyinc/views.py
@@ -28,3 +33,4 @@ boddyinc/static/pyramid.png
 boddyinc/static/transparent.gif
 boddyinc/templates/clueless.mako
 boddyinc/templates/mytemplate.pt
+boddyinc/templates/welcome.mako
