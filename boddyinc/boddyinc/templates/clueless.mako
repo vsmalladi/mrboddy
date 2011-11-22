@@ -17,7 +17,14 @@
             <div> <!--Accusation button here (jQuery toggle) --> </div>
             <div> <!--Disprove suggestion button here (jQuery toggle) --> </div>
         </div>
-        <div> <!--Player's hand of cards goes here --> </div>
+        <div>
+            <!--create listbox for hand of cards-->
+            <!--believe a list of cards will need to be passed to template from python-->
+            <select size=${cards.size} name="card_hand">
+                % for c in cards:                
+                    <option>${c.name}
+            </select>
+        </div>
         <div> <!--User info goes here (jQuery.ajax) --> </div>
         <div> <!--History goes here (jQuery.ajax) --> </div>
     </div>
