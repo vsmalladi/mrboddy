@@ -8,6 +8,7 @@ from player import Player
 from board import Board
 from gamerules import GameRules
 import os
+import pickle
 
 class Game(object):
     
@@ -28,9 +29,11 @@ class Game(object):
         self.__turn_tracker = None #flatfile to track turns in place of a database
         self.__tracker_name = "turn"
         self.game_board = None
-        self.user_tracker = None #flatfile to track number of users playing
+        self.__user_tracker = None #flatfile to track number of users playing
         self.user_tracker_name = "users"
         self.gamerules = None
+        self.__player_tracker = None #flatfile to track player instances
+        self.player_tracker_name = "player"
     
     def __get_card(self,card_dict):
         """
@@ -118,6 +121,11 @@ class Game(object):
             remove(self.__turn_tracker)
             self.__user_tracker.close
             remove(self.__user_tracker)
+            
+            for c in self.__characters:
+                if path.exists(c):
+                    remove(c)
+            
         except IOError:
             print "Something went wrong cleaning up the game"
             return false
@@ -145,6 +153,8 @@ class Game(object):
         self.active_player = self.players[0]
         self.__game_status = True
         
+        count = 1
+        
         for player in self.players:
             player.character = self.__characters.pop(0)
             
@@ -153,7 +163,15 @@ class Game(object):
                 card = self.__get_remaining_card(self._card_list)
                 player.hand[card] = card
 
-    
+                #write each player object to a file named <character_name>
+                try:
+                    self.__player_tracker = open(player.get_name, 'w')
+                    pickle.dump(player, self.__player_tracker)
+                    self.__turn_tracker.close()
+                    count += 1
+                except IOError:
+                    raise IOError
+                
     @property
     def get_case(self):
         """
