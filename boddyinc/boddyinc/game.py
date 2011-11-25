@@ -9,6 +9,7 @@ from board import Board
 from gamerules import GameRules
 import os
 import pickle
+import sys
 
 class Game(object):
     
@@ -92,7 +93,7 @@ class Game(object):
         """
         try:
             self.__turn_tracker = open(self.__tracker_name, 'w')
-            self.__turn_tracker.write(player)
+            pickle.dump(player, self.__turn_tracker)
             self.__turn_tracker.close()
         except IOError:
             return False
@@ -100,10 +101,10 @@ class Game(object):
         return True
     
         
-    def create_turntracker(self, player):
+    def check_turntracker(self, player):
         
         try:
-            if path.exists(self.tracker_name):
+            if path.exists(self.__tracker_name):
                 print("A game is already in progress. Please try again later.")
         except IOError:
             return false    
@@ -113,7 +114,7 @@ class Game(object):
     
     def cleanup(self):
         """
-        Remove turn and user trackers at end of game
+        Remove tracker flatfiles at end of game
         """
         
         try:
@@ -122,9 +123,12 @@ class Game(object):
             self.__user_tracker.close
             remove(self.__user_tracker)
             
+            count = 1
+            
             for c in self.__characters:
                 if path.exists(c):
-                    remove(c)
+                    remove(c + i)
+                    count += 1
             
         except IOError:
             print "Something went wrong cleaning up the game"
@@ -137,13 +141,20 @@ class Game(object):
         """
         Get the current player
         """
+        active_player = None
         
-        pass
+        try:
+            file = open(self.__tracker_name, 'r')
+            active_player = pickle.load(file)
+        except IOError:
+            print "Something went wrong reading the active player"
+        
+        return active_player
     
         
     def initialize(self,players):
         """
-        Initializes game
+        Initialize game
         """
         self.players = players
         self.case_file = self.__create_case()
@@ -154,6 +165,8 @@ class Game(object):
         self.__game_status = True
         
         count = 1
+        
+        check_turntracker #make sure a game isn't already in progress
         
         for player in self.players:
             player.character = self.__characters.pop(0)
@@ -167,10 +180,12 @@ class Game(object):
                 try:
                     self.__player_tracker = open(player.get_name, 'w')
                     pickle.dump(player, self.__player_tracker)
-                    self.__turn_tracker.close()
+                    self.__player_tracker.close()
                     count += 1
                 except IOError:
-                    raise IOError
+                    print "Something went wrong tracking players. Game play can't continue"
+                    cleanup
+                    sys.exit
                 
     @property
     def get_case(self):
@@ -185,6 +200,8 @@ class Game(object):
         """
         Returns the active player
         """
+        self.active_player = read_turn_tracker
+        
         return self.active_player.get_name
     
     
@@ -209,33 +226,38 @@ class Game(object):
                 current_player = self.players[self.players.index(self.active_player)]
                 player_inplay = current_player.inplay
                 
+                #update turn tracker
+                if not (self.update_turntracker(self.active_player.character)):
+                    print("Error") #need to decide what to do here - quit?
+                
             except IndexError:
                 self.active_player = player = self.players[0]
                 current_player = self.players[0]
                 player_inplay = current_player.inplay
             
-            # If loop through all players and no on is active
+            # If loop through all players and no one is active
             if self.active_player.get_name == current_active:
                 self.__game_status = False
                 print "It was %s in the %s with the %s" % (self.case_file["Suspect"],self.case_file["Room"],self.case_file["Weapon"])
-                print "The Game is Over.Everyone guessed incorrectly"
+                print "The game is over. Everyone guessed incorrectly"
                 break
-                
-        #update turn tracker
-        if not (self.update_turntracker(self.active_player.character)):
-            print("Error") #need to decide what to do here
+        
         
     def __set_disprove_player_order(self):
         """
         Return a list of players in order for disproving a suggestion
         """
         disprove_player_list = []
+        
         if self.players.index(self.active_player) == 0:
             disprove_player_list = disprove_player_list + self.players[:]
+            
         else:
             disprove_player_list = disprove_player_list + self.players[self.players.index(self.active_player):]
             disprove_player_list = disprove_player_list + self.players[:self.players.index(self.active_player) - 1]
+            
         return disprove_player_list
+    
     
     def add_player(self, player_name):
         
@@ -321,6 +343,7 @@ class Game(object):
         else:
             return False
     
+    
     def available_cards_disprove(self,player):
         """
         Returns a dict of cards available from a player to
@@ -350,6 +373,7 @@ class Game(object):
         
         return True
     
+    
     def make_accusation(self,room,suspect,weapon):
         """
         Player makes accusation
@@ -361,6 +385,7 @@ class Game(object):
             self.active_player.inplay = False
             print "Your guess was incorrect"
             print "It was not %s in the %s with the %s" % (suspect,room,weapon)
+    
     
     def game_play(self):
         """
@@ -376,6 +401,7 @@ class Game(object):
             print "4. End Turn"
             
             user_choice = raw_input("Choose an option from the menu: ")
+    
             if user_choice == "1":
                 new_room = raw_input("Enter the name of the room you will move to: ")
                 self.make_move(new_room)
@@ -389,6 +415,7 @@ class Game(object):
 
                 for disprove_player in reversed(disprove_player_list):
                     print disprove_player.get_name
+    
                     if disprove_player == self.active_player:
                             print "No one can disprove the suggestion"
                             break
@@ -408,5 +435,3 @@ class Game(object):
                 
             elif user_choice == "4":
                 self.__set_active_player()
-            
-            

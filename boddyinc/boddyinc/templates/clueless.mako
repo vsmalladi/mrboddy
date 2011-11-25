@@ -23,6 +23,7 @@
             <select size=${cards.size} name="card_hand">
                 % for c in cards:                
                     <option>${c.name}
+                % endfor
             </select>
         </div>
         <div> <!--User info goes here (jQuery.ajax) --> </div>
