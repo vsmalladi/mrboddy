@@ -10,9 +10,9 @@ from gamerules import GameRules
 import os
 import pickle
 import sys
+import simplejson as json
 
 class Game(object):
-    
     
     def __init__(self):
         self.case_file = {}
@@ -123,13 +123,10 @@ class Game(object):
             self.__user_tracker.close
             remove(self.__user_tracker)
             
-            count = 1
-            
             for c in self.__characters:
                 if path.exists(c):
-                    remove(c + i)
-                    count += 1
-            
+                    remove(c)
+                    
         except IOError:
             print "Something went wrong cleaning up the game"
             return false
@@ -152,10 +149,20 @@ class Game(object):
         return active_player
     
         
-    def initialize(self,players):
+    def initialize(self):
         """
         Initialize game
         """
+        
+        #create list of player objects
+        num_players = self.get_num_players
+        players = []
+        temp_chars = self.__characters
+        
+        for i in 0..num_players:
+            p = Player()
+            players.add(temp_chars.pop())
+            
         self.players = players
         self.case_file = self.__create_case()
         self._card_list = self.__make_card_list(self.case_file)
@@ -164,12 +171,7 @@ class Game(object):
         self.active_player = self.players[0]
         self.__game_status = True
         
-        count = 1
-        
         check_turntracker #make sure a game isn't already in progress
-        
-        for player in self.players:
-            player.character = self.__characters.pop(0)
             
         while len(self._card_list) > 0:
             for player in self.players:
@@ -178,10 +180,10 @@ class Game(object):
 
                 #write each player object to a file named <character_name>
                 try:
-                    self.__player_tracker = open(player.get_name, 'w')
+                    self.__player_tracker = open(player.get_character, 'w')
                     pickle.dump(player, self.__player_tracker)
                     self.__player_tracker.close()
-                    count += 1
+
                 except IOError:
                     print "Something went wrong tracking players. Game play can't continue"
                     cleanup
@@ -279,6 +281,7 @@ class Game(object):
                 np = 1
                     
             self.__user_tracker.write(self.__num_players)
+            self.__user_tracker.close
         
         except IOError:
             return false
@@ -291,7 +294,9 @@ class Game(object):
     def get_num_players(self):
         
         try:
-            self.__num_players = self.__user_tracker.readline
+            file = open(self.__user_tracker)
+            self.__num_players = file.readline
+            file.close
         
         except IOError:
             return None
@@ -435,3 +440,25 @@ class Game(object):
                 
             elif user_choice == "4":
                 self.__set_active_player()
+    
+    
+    def encode_num_players(self):
+        num_players = json.dumps(self.get_num_players)
+        
+        return num_players
+    
+    
+    def encode_player_info(self):
+        
+        temp_player_list = []
+        
+        for p in self.__characters:
+            try:
+                if path.exists(p):
+                    file = open(p, 'r')
+                    temp_player = pickle.load(file)
+                    temp_player_list.append(json.dumps(temp_player))
+            except:
+                print "Something went wrong reading file"
+                   
+        return temp_player_list
