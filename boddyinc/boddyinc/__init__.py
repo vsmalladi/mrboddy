@@ -1,10 +1,14 @@
 from pyramid.config import Configurator
 from boddyinc.resources import Root
+from sqlalchemy import engine_from_config
+from boddyinc.models import initialize_sql
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    config = Configurator(root_factory=Root, settings=settings)    
+    engine = engine_from_config(settings, 'sqlalchemy.')
+    initialize_sql(engine)
+    config = Configurator(root_factory=Root, settings=settings)   
     config.add_view('boddyinc.views.join_game',
                     context='boddyinc:resources.Root',
                     renderer='boddyinc:templates/welcome.mako')

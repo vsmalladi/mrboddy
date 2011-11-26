@@ -7,8 +7,10 @@ setup.cfg
 setup.py
 boddyinc/__init__.py
 boddyinc/board.py
+boddyinc/database.py
 boddyinc/game.py
 boddyinc/gamerules.py
+boddyinc/models.py
 boddyinc/player.py
 boddyinc/playgame.py
 boddyinc/resources.py

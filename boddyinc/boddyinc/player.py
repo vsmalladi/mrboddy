@@ -58,5 +58,3 @@ class Player(object):
         Player reveals a particular card to disprove some suggestion
         """
         return self.hand[card_name]
-        
-        
