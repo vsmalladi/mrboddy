@@ -1,3 +1,5 @@
+#! /usr/local/bin/python
+import sqlalchemy
 from sqlalchemy import *
 
 metaData = MetaData()
@@ -19,3 +21,6 @@ board = Table('board', metadata,
               Column('player', ForeignKey("players.character_name"), nullable = False),
               Column('player_location', String(40), nullable = False))
 
+engine = create_engine('sqlite:////var/www/boddyinc/database.db')
+
+metadata.create_all(engine)
