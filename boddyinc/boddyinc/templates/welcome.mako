@@ -6,11 +6,16 @@
     <title>Clue-Less by Boddy, Inc.</title>
 </head>
 <body>
-    Welcome to Clue-Less! There are <!--retrieve number of users-->
-    players waiting to play. Would you like to join them?
+    %if state == False and players < 6:
+        Welcome to Clue-Less! There are ${players}
+        players waiting to play.
+        <a href="${request.route_url('submit')}">Join Game</a>
+
+    %else:
+        There is already a came in progress. Come back later.
+    %endif
     
-    <!--insert "Join" button that takes user to intermediate waiting page, which displays the
-    number of users waiting for a game to start -->
+
     
 </body>
 </html>
