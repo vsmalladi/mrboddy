@@ -13,7 +13,10 @@ players = Table('players', metadata,
 game = Table('game', metadata, \
     Column('num_players', Integer, primary_key = True), \
     Column('case_file', PickleType(), nullable = False), \
-    Column('active_player', ForeignKey("players.character_name"), nullable=False))
+    Column('active_player', ForeignKey("players.character_name"), nullable=False), \
+    Column('game_status', Boolean, nullable = False), \
+    Column('player_list', PickleType(), nullable = False))
+)
 
 board = Table('board', metadata, \
               Column('weapon', String(40), nullable = False), \

@@ -11,6 +11,7 @@ import os
 import pickle
 import sys
 import simplejson as json
+from sqlalchemy import *
 
 class Game(object):
     
@@ -27,15 +28,13 @@ class Game(object):
         self.suggest_room = None
         self.suggest_weapon = None
         self.__num_players = 0
-        self.__turn_tracker = None #flatfile to track turns in place of a database
-        self.__tracker_name = "turn"
-        self.game_board = None
-        self.__user_tracker = None #flatfile to track number of users playing
-        self.user_tracker_name = "users"
-        self.gamerules = None
-        self.__player_tracker = None #flatfile to track player instances
-        self.player_tracker_name = "player"
-    
+        self.engine = None
+        self.game_ins = insert()
+        self.player_ins = insert()
+        self.board_ins = insert()
+        self.conn = None #database connection
+        
+        
     def __get_card(self,card_dict):
         """
         Returns a random card from the card dictionary
@@ -52,6 +51,13 @@ class Game(object):
         case['Suspect'] = self.__get_card(self.__character_dict)
         case['Weapon'] = self.__get_card(self.__weapon_dict)
         case['Room'] = self.__get_card(self.__room_dict)
+        
+        try:
+            ins = game_ins.values(casefile=case)
+            conn.execute(ins)
+        except:
+            raise
+        
         return case
     
     
@@ -85,22 +91,7 @@ class Game(object):
         return card
     
     
-    def update_turntracker(self, player):
-        """
-        Updates a flatfile to use to track whose turn it is
-        
-        May need to update this to incorporate authentication (pyramid_who)
-        """
-        try:
-            self.__turn_tracker = open(self.__tracker_name, 'w')
-            pickle.dump(player, self.__turn_tracker)
-            self.__turn_tracker.close()
-        except IOError:
-            return False
-        
-        return True
-    
-        
+    '''    
     def check_turntracker(self, player):
         
         try:
@@ -110,8 +101,9 @@ class Game(object):
             return false    
             
         return true
-       
+    ''' 
     
+    '''
     def cleanup(self):
         """
         Remove tracker flatfiles at end of game
@@ -132,8 +124,9 @@ class Game(object):
             return false
         
         return true
+    '''
     
-    
+    '''
     def read_truntracker(self):
         """
         Get the current player
@@ -147,12 +140,15 @@ class Game(object):
             print "Something went wrong reading the active player"
         
         return active_player
-    
+    '''
         
     def initialize(self):
         """
         Initialize game
         """
+        
+        engine = create_engine('sqlite:////var/www/mrboddy/boddyinc/boddyinc/database.db', pool_size=6)
+        #may need to manage sessions and/or connection pools?
         
         #create list of player objects
         num_players = self.get_num_players
@@ -165,12 +161,21 @@ class Game(object):
             
         self.players = players
         self.case_file = self.__create_case()
-        self._card_list = self.__make_card_list(self.case_file)
+        
+        #TODO: this group may need to be written to the database
+        self._card_list = self.__make_card_list(self.case_file) 
         self.game_board = Board()
         self.gamerules = GameRules()
+        
         self.active_player = self.players[0]
         self.__game_status = True
         
+        #update DB
+        conn.execute(game_ins, [player_list=players, \
+                     active_player = self.active_player.get_character, \
+                     game_status = self.__game_status])
+        
+        #TODO: update this
         check_turntracker #make sure a game isn't already in progress
             
         while len(self._card_list) > 0:
@@ -178,14 +183,16 @@ class Game(object):
                 card = self.__get_remaining_card(self._card_list)
                 player.hand[card] = card
 
-                #write each player object to a file named <character_name>
+                #add each player to DB
                 try:
-                    self.__player_tracker = open(player.get_character, 'w')
-                    pickle.dump(player, self.__player_tracker)
-                    self.__player_tracker.close()
+                    conn.execute(player_ins, [character_name=player.get_character,
+                                              location=player.location,
+                                              cards=player.hand,
+                                              inplay=player.inplay])
 
                 except IOError:
-                    print "Something went wrong tracking players. Game play can't continue"
+                    print "Something went wrong writing game information to database. \
+                    Game play can't continue"
                     cleanup
                     sys.exit
                 
@@ -202,9 +209,12 @@ class Game(object):
         """
         Returns the active player
         """
-        self.active_player = read_turn_tracker
-        
-        return self.active_player.get_name
+        try:
+            active_player_name = conn.execute("SELECT active_player FROM game")
+        except:
+            raise
+
+        return active_player_name
     
     
     @property
@@ -212,6 +222,11 @@ class Game(object):
         """
         Returns the state of the game
         """
+        try:
+            self.__game_status = conn.execute("SELECT game_status FROM game")
+        except:
+            raise
+        
         return self.__game_status
     
     
@@ -220,7 +235,11 @@ class Game(object):
         Set the next active player
         """
         player_inplay = False
-        current_active = self.active_player.get_name
+        current_active = get_active_player
+        
+        for p in players:
+            if p == current_active:
+                self.active_player = p
         
         while player_inplay == False:    
             try:
@@ -228,9 +247,10 @@ class Game(object):
                 current_player = self.players[self.players.index(self.active_player)]
                 player_inplay = current_player.inplay
                 
-                #update turn tracker
-                if not (self.update_turntracker(self.active_player.character)):
-                    print("Error") #need to decide what to do here - quit?
+                try:
+                    status = conn.execute("UPDATE players SET players.active_player=" + self.active_player)
+                except:
+                    raise
                 
             except IndexError:
                 self.active_player = player = self.players[0]
@@ -240,11 +260,19 @@ class Game(object):
             # If loop through all players and no one is active
             if self.active_player.get_name == current_active:
                 self.__game_status = False
+                status = conn.execute("UPDATE game SET game.status=FALSE")
+                
+                try:
+                    self.case_file = conn.execute("SELECT case_file FROM players")
+                except:
+                    raise
+                
                 print "It was %s in the %s with the %s" % (self.case_file["Suspect"],self.case_file["Room"],self.case_file["Weapon"])
                 print "The game is over. Everyone guessed incorrectly"
                 break
         
         
+    #TODO: not updated for DB yet
     def __set_disprove_player_order(self):
         """
         Return a list of players in order for disproving a suggestion
@@ -266,26 +294,15 @@ class Game(object):
         """
         This function should be called when a user decides to join the game.
         """
-        if not path.exists(self.tracker_name):
-            try:
-                self.__user_tracker = open(self.__user_tracker_name, 'r+')
-                
-            except IOError:
-                return false
-        
         try:
-            np = self.__user_tracker.readline
-            if np != "":
-                self.__num_players = np + 1
-            else:
-                np = 1
-                    
-            self.__user_tracker.write(self.__num_players)
-            self.__user_tracker.close
+            conn.create
+            num_players = conn.execute("SELECT num_players FROM players")
+            ins = game_ins(players.num_players = num_playes + 1)
+            conn.execue(ins)
+        except:
+            raise
         
-        except IOError:
-            return false
-        
+        #TODO: update
         players.add(player_name)
         
         return true               
@@ -294,16 +311,14 @@ class Game(object):
     def get_num_players(self):
         
         try:
-            file = open(self.__user_tracker)
-            self.__num_players = file.readline
-            file.close
-        
-        except IOError:
-            return None
+            self.__num_players = conn.execute("SELECT num_players FROM game")                    
+        except:
+            raise
         
         return self.__num_players
     
     
+    #TODO: update for DB
     def make_move(self,move_to):
         """
         Movement of player 
@@ -316,7 +331,8 @@ class Game(object):
             print "That is not a valid move."
             return False
 
-    
+
+    #TODO: update for DB
     def make_suggestion(self,suspect,weapon):
         """
         Player makes a suggestion
@@ -335,6 +351,7 @@ class Game(object):
                (self.active_player.get_name, self.suggest_suspect, self.suggest_room,self.suggest_weapon))
         
     
+    #TODO: update for DB
     def check_disprove_suggestion(self,player):
         """
         Checks if a player can disprove a suggestion
@@ -348,7 +365,7 @@ class Game(object):
         else:
             return False
     
-    
+    #TODO: update for DB
     def available_cards_disprove(self,player):
         """
         Returns a dict of cards available from a player to
@@ -367,6 +384,7 @@ class Game(object):
         return can_disprove
         
         
+    #TODO: update for DB    
     def disprove_suggestion(self,player,card):
         #I think this will need to be implemented once the interaction
         #once there is a way to interace with the UI
@@ -378,7 +396,7 @@ class Game(object):
         
         return True
     
-    
+    #TODO: update for DB  
     def make_accusation(self,room,suspect,weapon):
         """
         Player makes accusation
@@ -391,7 +409,7 @@ class Game(object):
             print "Your guess was incorrect"
             print "It was not %s in the %s with the %s" % (suspect,room,weapon)
     
-    
+    #TODO: update for DB?
     def game_play(self):
         """
         This is the main game loop that would be
@@ -441,7 +459,7 @@ class Game(object):
             elif user_choice == "4":
                 self.__set_active_player()
     
-    
+    '''
     def encode_num_players(self):
         num_players = json.dumps(self.get_num_players)
         
@@ -462,3 +480,4 @@ class Game(object):
                 print "Something went wrong reading file"
                    
         return temp_player_list
+    '''
