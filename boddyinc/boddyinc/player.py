@@ -1,5 +1,7 @@
 #! /usr/local/bin/python
 
+from sqlalchemy import *
+
 class Player(object):
     
     def __init__(self,name):
@@ -30,10 +32,17 @@ class Player(object):
         """
         return self.position
     
-    def update_position(self,new_position):
+    def update_position(self, new_position, conn):
         """
         Updates the player's position
         """
+        str = "UPDATE players SET players.location=" + new_position \
+              + " WHERE players.character_name=" + self.character
+        try:
+            status = conn.execute(str)
+        except:
+            raise
+        
         self.position = new_position
     
 
@@ -53,7 +62,7 @@ class Player(object):
         return self.inplay
     
     
-    def reveal_card(self,card_name):
+    def reveal_card(self, card_name):
         """
         Player reveals a particular card to disprove some suggestion
         """

@@ -1,5 +1,7 @@
 #! /usr/local/bin/python
 
+from sqlalchemy import *
+
 class Board(object):
     
     def __init__(self):
@@ -18,9 +20,9 @@ class Board(object):
         return player.get_position
         
     
-    def set_player_location(self, player, room):
+    def set_player_location(self, player, room, conn):
         
-        player.update_position(room)
+        player.update_position(room, conn)
         self.player_locations[player]=player.get_position
     
     @property
@@ -33,10 +35,16 @@ class Board(object):
         
         return self.weapon_locations.get(weapon)
         
-        
-    def set_weapon_location(self, weapon, room):
+    def set_weapon_location(self, weapon, room, conn):
         
         self.weapon_locations[weapon] = room
+    
+        try:
+            self.board_ins = board.insert()
+            ins = board_ins.values(weapon_location=room)
+            conn.execute(ins)
+        except:
+            raise
     
     
     def display_player_location(self, player):

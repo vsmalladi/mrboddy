@@ -29,11 +29,12 @@ class Game(object):
         self.suggest_weapon = None
         self.__num_players = 0
         self.engine = None
-        self.game_ins = insert()
-        self.player_ins = insert()
-        self.board_ins = insert()
+        self.game_ins = game.insert()
+        self.player_ins = players.insert()
+        self.board_ins = board.insert()
         self.conn = None #database connection
-        
+        self.game_board = None
+        self.metadata = None
         
     def __get_card(self,card_dict):
         """
@@ -54,7 +55,7 @@ class Game(object):
         
         try:
             ins = game_ins.values(casefile=case)
-            conn.execute(ins)
+            self.conn.execute(ins)
         except:
             raise
         
@@ -90,111 +91,110 @@ class Game(object):
         card = card_list.pop(randrange(0,len(card_list)))
         return card
     
-    
-    '''    
-    def check_turntracker(self, player):
+       
+    def check_game_status(self):
         
         try:
-            if path.exists(self.__tracker_name):
-                print("A game is already in progress. Please try again later.")
-        except IOError:
-            return false    
+            s = game.select(game_status)
             
-        return true
-    ''' 
+            if self.conn.execute(s):
+                print("A game is already in progress. Please try again later.")
+                return true
+        except:
+            raise   
+            
+        return false
+     
     
-    '''
     def cleanup(self):
         """
-        Remove tracker flatfiles at end of game
+        Remove game info from database
         """
         
         try:
-            self.__turn_tracker.close
-            remove(self.__turn_tracker)
-            self.__user_tracker.close
-            remove(self.__user_tracker)
-            
-            for c in self.__characters:
-                if path.exists(c):
-                    remove(c)
+            d = self.conn.begin()
+
+            for table in reversed(meta.sorted_tables):
+                print table.delete()
+                self.conn.execute(table.delete())
+
+            d.commit() 
                     
-        except IOError:
+        except:
             print "Something went wrong cleaning up the game"
             return false
         
         return true
-    '''
-    
-    '''
-    def read_truntracker(self):
-        """
-        Get the current player
-        """
-        active_player = None
-        
-        try:
-            file = open(self.__tracker_name, 'r')
-            active_player = pickle.load(file)
-        except IOError:
-            print "Something went wrong reading the active player"
-        
-        return active_player
-    '''
         
     def initialize(self):
         """
         Initialize game
         """
         
-        engine = create_engine('sqlite:////var/www/mrboddy/boddyinc/boddyinc/database.db', pool_size=6)
-        #may need to manage sessions and/or connection pools?
+        initialize_db #may need to manage sessions and/or connection pools?
         
         #create list of player objects
         num_players = self.get_num_players
         players = []
         temp_chars = self.__characters
         
-        for i in 0..num_players:
-            p = Player()
-            players.add(temp_chars.pop())
+        #if a game isn't already in progress, continue
+        if not check_game_status: 
+        
+            for i in 0..num_players:
+                p = Player()
+                players.add(temp_chars.pop())
+                
+            self.players = players
+            self.case_file = self.__create_case()
             
-        self.players = players
-        self.case_file = self.__create_case()
-        
-        #TODO: this group may need to be written to the database
-        self._card_list = self.__make_card_list(self.case_file) 
-        self.game_board = Board()
-        self.gamerules = GameRules()
-        
-        self.active_player = self.players[0]
-        self.__game_status = True
-        
-        #update DB
-        conn.execute(game_ins, [player_list=players, \
-                     active_player = self.active_player.get_character, \
-                     game_status = self.__game_status])
-        
-        #TODO: update this
-        check_turntracker #make sure a game isn't already in progress
+            self._card_list = self.__make_card_list(self.case_file) 
+            self.game_board = Board()
+            self.gamerules = GameRules()
             
-        while len(self._card_list) > 0:
-            for player in self.players:
-                card = self.__get_remaining_card(self._card_list)
-                player.hand[card] = card
-
-                #add each player to DB
-                try:
-                    conn.execute(player_ins, [character_name=player.get_character,
-                                              location=player.location,
-                                              cards=player.hand,
-                                              inplay=player.inplay])
-
-                except IOError:
-                    print "Something went wrong writing game information to database. \
-                    Game play can't continue"
-                    cleanup
-                    sys.exit
+            #initialize board & write to DB
+            for p in players:
+                for r in self.__room_dict:
+                    if self.gamerules.is_empty_room(r):
+                        self.game_board.set_player_location(p, r, self.conn)
+                        
+                        try:
+                            self.game_board.set_player_location(p, self.conn)
+                        except:
+                            raise
+            
+            for w in self.__weapon_dict:
+                for r in self.__room_dict:
+                    self.game_board.set_weapon_location(w, r, self.conn)
+                    
+                
+            self.active_player = self.players[0]
+            self.__game_status = True
+            
+            #update DB
+            ins = game_ins([player_list = self.players, \
+                         active_player = self.active_player.get_character(self.conn), \
+                         game_status = self.__game_status])
+            self.conn.execute(ins)
+            
+                
+            while len(self._card_list) > 0:
+                for player in self.players:
+                    card = self.__get_remaining_card(self._card_list)
+                    player.hand[card] = card
+    
+                    #add each player to DB
+                    try:
+                        self.conn.execute(player_ins, [character_name=player.get_character,
+                                                  location=player.location,
+                                                  cards=player.hand,
+                                                  inplay=player.inplay])
+    
+                    except:
+                        print "Something went wrong writing game information to database. \
+                        Game play can't continue"
+                        cleanup
+                        sys.exit
                 
     @property
     def get_case(self):
@@ -210,12 +210,11 @@ class Game(object):
         Returns the active player
         """
         try:
-            active_player_name = conn.execute("SELECT active_player FROM game")
+            active_player_name = self.conn.execute("SELECT active_player FROM game")
         except:
             raise
 
         return active_player_name
-    
     
     @property
     def get_game_state(self):
@@ -223,7 +222,7 @@ class Game(object):
         Returns the state of the game
         """
         try:
-            self.__game_status = conn.execute("SELECT game_status FROM game")
+            self.__game_status = self.conn.execute("SELECT game_status FROM game")
         except:
             raise
         
@@ -248,8 +247,8 @@ class Game(object):
                 player_inplay = current_player.inplay
                 
                 try:
-                    status = conn.execute("UPDATE players SET players.active_player=" + self.active_player)
-                except:
+                    
+                except:status = self.conn.execute("UPDATE players SET players.active_player=" + self.active_player)
                     raise
                 
             except IndexError:
@@ -260,10 +259,10 @@ class Game(object):
             # If loop through all players and no one is active
             if self.active_player.get_name == current_active:
                 self.__game_status = False
-                status = conn.execute("UPDATE game SET game.status=FALSE")
+                status = self.conn.execute("UPDATE game SET game.status=FALSE")
                 
                 try:
-                    self.case_file = conn.execute("SELECT case_file FROM players")
+                    self.case_file = self.conn.execute("SELECT case_file FROM players")
                 except:
                     raise
                 
@@ -295,15 +294,20 @@ class Game(object):
         This function should be called when a user decides to join the game.
         """
         try:
-            conn.create
-            num_players = conn.execute("SELECT num_players FROM players")
+            self.conn.create
+            num_players = self.conn.execute("SELECT num_players FROM players")
             ins = game_ins(players.num_players = num_playes + 1)
-            conn.execue(ins)
+            self.conn.execue(ins)
         except:
             raise
         
-        #TODO: update
         players.add(player_name)
+        
+        try:
+            ins = game_ins(name = player_name)
+            self.conn.execute(ins)
+        except:
+            return false
         
         return true               
         
@@ -311,21 +315,21 @@ class Game(object):
     def get_num_players(self):
         
         try:
-            self.__num_players = conn.execute("SELECT num_players FROM game")                    
+            self.__num_players = self.conn.execute("SELECT num_players FROM game")                    
         except:
             raise
         
         return self.__num_players
     
     
-    #TODO: update for DB
     def make_move(self,move_to):
         """
         Movement of player 
         """
-        if self.gamerules.is_valid_move(self.game_board,self.active_player,move_to):
-            self.game_board.set_player_location(self.active_player, move_to)
-            print "%s has moved to %s" % (self.active_player.get_name,move_to)
+        
+        if self.gamerules.is_valid_move(self.game_board, self.active_player, move_to):
+            self.game_board.set_player_location(self.active_player, move_to, self.conn)
+            print "%s has moved to %s" % (self.active_player.get_name, move_to)
             return True
         else:
             print "That is not a valid move."
@@ -337,6 +341,15 @@ class Game(object):
         """
         Player makes a suggestion
         """
+        try:
+            active_player_name = get_active_player
+        except:
+            raise
+        
+        for p in players:
+            if p.get_character = active_player_name:
+                self.active_player = p
+                
         self.suggest_room = self.active_player.get_position
         self.suggest_suspect = suspect
         self.suggest_weapon = weapon
@@ -344,11 +357,11 @@ class Game(object):
         #Move player's character to new room
         for p in self.players:
             if p.get_character == suspect:
-                self.game_board.set_player_location(p,self.suggest_room)
-                print "%s (%s) is now at %s" % (p.get_name,p.get_character,p.get_position)
+                self.game_board.set_player_location(p, self.suggest_room, self.conn)
+                print "%s (%s) is now at %s" % (p.get_name, p.get_character, p.get_position)
         
         print ("%s thinks it was %s in the %s with a %s." %\
-               (self.active_player.get_name, self.suggest_suspect, self.suggest_room,self.suggest_weapon))
+               (self.active_player.get_name, self.suggest_suspect, self.suggest_room, self.suggest_weapon))
         
     
     #TODO: update for DB
@@ -481,3 +494,29 @@ class Game(object):
                    
         return temp_player_list
     '''
+    
+    def initialize_db(self):
+        metadata = MetaData()
+
+        players = Table('players', metadata,
+            Column('character_name', Integer, primary_key = True), \
+            Column('inplay', Boolean, nullable = False), \
+            Column('location', String(60), nullable = True), \
+            Column('cards', PickleType(), nullable = False))
+
+        game = Table('game', metadata, \
+            Column('num_players', Integer, primary_key = True), \
+            Column('case_file', PickleType(), nullable = False), \
+            Column('active_player', ForeignKey("players.character_name"), nullable=False), \
+            Column('game_status', Boolean, nullable = False), \
+            Column('player_list', PickleType(), nullable = False))
+
+        board = Table('board', metadata, \
+                      Column('weapon', String(40), nullable = False), \
+                      Column('weapon_location', String(40), nullable = False), \
+                      Column('player', ForeignKey("players.character_name"), nullable = False), \
+                      Column('player_location', String(40), nullable = False))
+        
+        engine = create_engine('sqlite:////var/www/mrboddy/boddyinc/boddyinc/database.db')
+        
+        metadata.create_all(engine)

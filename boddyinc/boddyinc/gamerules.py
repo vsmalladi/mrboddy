@@ -15,7 +15,7 @@ class GameRules(object):
             self.player_list = board.get_player_list;
             
             #if the room is empty and doesn't have someone in it, the move is valid
-            if self.is_adjacent_to(room_to, room_from) and  self.is_empty_room(room_to):
+            if self.is_adjacent_to(room_to, room_from) and  self.is_empty_room(room_to, conn):
                 return True
             else:
                 return False

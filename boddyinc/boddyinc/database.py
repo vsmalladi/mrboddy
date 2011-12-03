@@ -8,7 +8,8 @@ players = Table('players', metadata,
     Column('character_name', Integer, primary_key = True), \
     Column('inplay', Boolean, nullable = False), \
     Column('location', String(60), nullable = True), \
-    Column('cards', PickleType(), nullable = False))
+    Column('cards', PickleType(), nullable = False), \
+    Column('name', String, nullable = False))
 
 game = Table('game', metadata, \
     Column('num_players', Integer, primary_key = True), \
