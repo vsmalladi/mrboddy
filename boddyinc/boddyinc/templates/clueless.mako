@@ -20,11 +20,6 @@
         <div>
             <!--create listbox for hand of cards-->
             <!--believe a list of cards will need to be passed to template from python-->
-            <select size=${cards.size} name="card_hand">
-                % for c in cards:                
-                    <option>${c.name}
-                % endfor
-            </select>
         </div>
         <div> <!--User info goes here (jQuery.ajax) --> </div>
         <div> <!--History goes here (jQuery.ajax) --> </div>
