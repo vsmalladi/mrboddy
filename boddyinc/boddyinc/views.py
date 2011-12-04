@@ -33,14 +33,15 @@ def main_game(request):
 
 @view_config(route_name='welcome',renderer='welcome.mako')
 def join_game(request):
-    #game_status = current_game.get_game_state
-    #num_players = current_game.get_num_players()
-    return {'state':False,'players':3}
+    game_status = current_game.get_game_state
+    num_players = current_game.get_num_players()
+    return {'state':game_status,'players':num_players}
     
 @view_config(route_name='submit',renderer='clueless.mako')
 def submit(request):
     if request.method == 'POST':
         if request.POST.get('name'):
+            current_game.add_player(request.POST.get('name'))
             return HTTPFound(location=request.route_url('join_game'))
     return {}
 
