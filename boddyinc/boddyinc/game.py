@@ -172,11 +172,16 @@ class Game(object):
             self.__game_status = True
             
             #update DB
-            ins = game_ins([player_list = self.players, \
-                         active_player = self.active_player.get_character(self.conn), \
-                         game_status = self.__game_status])
-            self.conn.execute(ins)
-            
+            try:
+                ins = game_ins(player_list=self.players)
+                self.conn.execute(ins)
+                ins = game_ins(active_player = self.active_player.get_character(self.conn))
+                self.conn.execute(ins)
+                ins = game_ins(game_status = self.__game_status)
+                self.conn.execute(ins)
+                
+            except:
+                raise
                 
             while len(self._card_list) > 0:
                 for player in self.players:
@@ -185,10 +190,14 @@ class Game(object):
     
                     #add each player to DB
                     try:
-                        self.conn.execute(player_ins, [character_name=player.get_character,
-                                                  location=player.location,
-                                                  cards=player.hand,
-                                                  inplay=player.inplay])
+                        ins = player_ins(character_name=player.get_character)
+                        self.conn.execute(ins)
+                        ins = player_ins(location=player.location)
+                        self.conn.execute(ins)
+                        ins = player_ins(cards=player.hand)
+                        self.conn.execute(ins)
+                        ins = player_ins(inplay=player.inplay)
+                        self.conn.execute(ins) 
     
                     except:
                         print "Something went wrong writing game information to database. \
@@ -247,8 +256,8 @@ class Game(object):
                 player_inplay = current_player.inplay
                 
                 try:
-                    
-                except:status = self.conn.execute("UPDATE players SET players.active_player=" + self.active_player)
+                    status = self.conn.execute("UPDATE players SET players.active_player=" + self.active_player)
+                except:
                     raise
                 
             except IndexError:
@@ -296,7 +305,8 @@ class Game(object):
         try:
             self.conn.create
             num_players = self.conn.execute("SELECT num_players FROM players")
-            ins = game_ins(players.num_players = num_playes + 1)
+            num_players += 1
+            ins = player_ins(num_players = num_players)
             self.conn.execue(ins)
         except:
             raise
@@ -347,7 +357,7 @@ class Game(object):
             raise
         
         for p in players:
-            if p.get_character = active_player_name:
+            if p.get_character == active_player_name:
                 self.active_player = p
                 
         self.suggest_room = self.active_player.get_position
