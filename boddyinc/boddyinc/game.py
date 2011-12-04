@@ -214,9 +214,9 @@ class Game(object):
     
     
     @property
-    def get_active_player(self):
+    def get_active_player_name(self):
         """
-        Returns the active player
+        Returns the active player's name
         """
         try:
             active_player_name = self.conn.execute("SELECT active_player FROM game")
@@ -224,6 +224,17 @@ class Game(object):
             raise
 
         return active_player_name
+    
+    def get_active_player(self):
+        """
+        Returns the active player's name
+        """
+        
+        name = get_active_player_name
+        
+        for p in players:
+            if p.get_character == name:
+                return p
     
     @property
     def get_game_state(self):
@@ -243,11 +254,7 @@ class Game(object):
         Set the next active player
         """
         player_inplay = False
-        current_active = get_active_player
-        
-        for p in players:
-            if p == current_active:
-                self.active_player = p
+        self.active_player = get_active_player
         
         while player_inplay == False:    
             try:
@@ -280,12 +287,13 @@ class Game(object):
                 break
         
         
-    #TODO: not updated for DB yet
     def __set_disprove_player_order(self):
         """
         Return a list of players in order for disproving a suggestion
         """
         disprove_player_list = []
+        
+        self.active_player = get_active_player
         
         if self.players.index(self.active_player) == 0:
             disprove_player_list = disprove_player_list + self.players[:]
@@ -346,19 +354,11 @@ class Game(object):
             return False
 
 
-    #TODO: update for DB
     def make_suggestion(self,suspect,weapon):
         """
         Player makes a suggestion
         """
-        try:
-            active_player_name = get_active_player
-        except:
-            raise
-        
-        for p in players:
-            if p.get_character == active_player_name:
-                self.active_player = p
+        self.active_player = get_active_player
                 
         self.suggest_room = self.active_player.get_position
         self.suggest_suspect = suspect
@@ -374,7 +374,6 @@ class Game(object):
                (self.active_player.get_name, self.suggest_suspect, self.suggest_room, self.suggest_weapon))
         
     
-    #TODO: update for DB
     def check_disprove_suggestion(self,player):
         """
         Checks if a player can disprove a suggestion
@@ -388,7 +387,7 @@ class Game(object):
         else:
             return False
     
-    #TODO: update for DB
+    
     def available_cards_disprove(self,player):
         """
         Returns a dict of cards available from a player to
@@ -406,8 +405,7 @@ class Game(object):
             
         return can_disprove
         
-        
-    #TODO: update for DB    
+           
     def disprove_suggestion(self,player,card):
         #I think this will need to be implemented once the interaction
         #once there is a way to interace with the UI
@@ -419,18 +417,36 @@ class Game(object):
         
         return True
     
-    #TODO: update for DB  
     def make_accusation(self,room,suspect,weapon):
         """
         Player makes accusation
         """
+        try:
+            self.case_file = self.conn.executet("SELECT case_file FROM game")
+            self.active_player = get_active_player
+                    
+        except:
+            raise
+        
         if (suspect == self.case_file["Suspect"]) and (room == self.case_file["Room"]) and (weapon == self.case_file["Weapon"]):
             print "You are correct. You have won"
             self.__game_status = False
+            
+            try:
+                self.conn.execute("UPDATE game SET case_file=" + self.__game_status)
+            except:
+                raise
+            
         else:
             self.active_player.inplay = False
             print "Your guess was incorrect"
             print "It was not %s in the %s with the %s" % (suspect,room,weapon)
+            
+            try:
+                self.conn.execute("UPDATE players SET inplay=" + self.activeplayer.inplay \
+                                  + " WHERE players.character_name=" + self.active_player.get_character)
+            except:
+                raise
     
     #TODO: update for DB?
     def game_play(self):
