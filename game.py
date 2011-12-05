@@ -8,6 +8,7 @@ from player import Player
 from board import Board
 from gamerules import GameRules
 import os
+import sys
 
 class Game(object):
     
@@ -359,6 +360,7 @@ class Game(object):
             print "5. Show current position"
             print "6. List places on board"
             print "7. End Turn"
+            print "8. Quit Game"
             
             user_choice = raw_input("Choose an option from the menu: ")
             if user_choice == "1":
@@ -422,5 +424,20 @@ class Game(object):
                 self.active_player.move_status = False
                 self.active_player.suggest_status = False
                 self.__set_active_player()
-            
+                
+            elif user_choice == "8":
+                
+                for p in self.players:
+                    if self.active_player == p:
+                        self.players.remove(p)
+                        break
+                        
+                self.__num_players -= 1
+                
+                if self.__num_players > 2:
+                    self.__set_active_player
+                else:
+                    sys.exit("A player has left the game. There aren't enough players for game play to continue")
+                    
+                
             
