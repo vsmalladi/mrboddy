@@ -29,9 +29,12 @@ class Game(object):
         self.suggest_weapon = None
         self.__num_players = 0
         self.engine = None
-        self.game_ins = game.insert()
-        self.player_ins = players.insert()
-        self.board_ins = board.insert()
+        self.game_table = None #database table
+        self.players_table = None #db table
+        self.board_table = None
+        self.game_ins = None
+        self.player_ins = None
+        self.board_ins = None
         self.conn = None #database connection
         self.game_board = None
         self.metadata = None
@@ -263,7 +266,7 @@ class Game(object):
                 player_inplay = current_player.inplay
                 
                 try:
-                    status = self.conn.execute("UPDATE players SET players.active_player=" + self.active_player)
+                    status = self.conn.execute("UPDATE players SET active_player=" + self.active_player)
                 except:
                     raise
                 
@@ -275,7 +278,7 @@ class Game(object):
             # If loop through all players and no one is active
             if self.active_player.get_name == current_active:
                 self.__game_status = False
-                status = self.conn.execute("UPDATE game SET game.status=FALSE")
+                status = self.conn.execute("UPDATE game SET status=FALSE")
                 
                 try:
                     self.case_file = self.conn.execute("SELECT case_file FROM players")
@@ -524,20 +527,20 @@ class Game(object):
     def initialize_db(self):
         metadata = MetaData()
 
-        players = Table('players', metadata,
+        players_table = Table('players', metadata,
             Column('character_name', Integer, primary_key = True), \
             Column('inplay', Boolean, nullable = False), \
             Column('location', String(60), nullable = True), \
             Column('cards', PickleType(), nullable = False))
 
-        game = Table('game', metadata, \
+        game_table = Table('game', metadata, \
             Column('num_players', Integer, primary_key = True), \
             Column('case_file', PickleType(), nullable = False), \
             Column('active_player', ForeignKey("players.character_name"), nullable=False), \
             Column('game_status', Boolean, nullable = False), \
             Column('player_list', PickleType(), nullable = False))
 
-        board = Table('board', metadata, \
+        board_table = Table('board', metadata, \
                       Column('weapon', String(40), nullable = False), \
                       Column('weapon_location', String(40), nullable = False), \
                       Column('player', ForeignKey("players.character_name"), nullable = False), \
@@ -546,3 +549,7 @@ class Game(object):
         engine = create_engine('sqlite:////var/www/mrboddy/boddyinc/boddyinc/database.db')
         
         metadata.create_all(engine)
+        
+        self.game_ins = game_table.insert()
+        self.player_ins = players_table.insert()
+        self.board_ins = board_table.insert()
