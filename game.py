@@ -413,7 +413,7 @@ class Game(object):
                 for room in self.game_board.get_rooms:
                     print room
                     
-            elif user_choice == "5":
+            elif user_choice == "7":
                 self.active_player.move_status = False
                 self.__set_active_player()
             
