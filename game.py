@@ -350,45 +350,61 @@ class Game(object):
         called by playgame moduel
         """
         while self.__game_status == True:
-            print "It is %s turn." % (self.active_player.get_name)
+            print "It is %s turn (%s)." % (self.active_player.get_name,self.active_player.get_character)
             print "=== Menu ==="
             print "1. Make Movement"
             print "2. Make Suggestion"
             print "3. Make Accusation"
-            print "4. End Turn"
+            print "4. Show cards"
+            print "5. End Turn"
             
             user_choice = raw_input("Choose an option from the menu: ")
             if user_choice == "1":
-                new_room = raw_input("Enter the name of the room you will move to: ")
-                self.make_move(new_room)
+                if self.active_player.get_move_status == False:
+                    new_room = raw_input("Enter the name of the room you will move to: ")
+                    self.make_move(new_room)
+                    self.active_player.move_status = True
+                
+                else:
+                    print "Your have already moved this turn"
             
             elif user_choice == "2":
-                suspect = raw_input("Enter a suspect: ")
-                weapon = raw_input("Enter a weapon: ")
-                self.make_suggestion(suspect,weapon)
+                if self.active_player.get_position in self.__room_dict.values():
+                    suspect = raw_input("Enter a suspect: ")
+                    weapon = raw_input("Enter a weapon: ")
+                    self.make_suggestion(suspect,weapon)
                 
-                disprove_player_list = self.__set_disprove_player_order()
+                    disprove_player_list = self.__set_disprove_player_order()
 
-                for disprove_player in reversed(disprove_player_list):
-                    print disprove_player.get_name
-                    if disprove_player == self.active_player:
+                    for disprove_player in reversed(disprove_player_list):
+                        print disprove_player.get_name
+                        if disprove_player == self.active_player:
                             print "No one can disprove the suggestion"
                             break
-                    else:
-                        if self.check_disprove_suggestion(disprove_player) == True:
-                            print self.available_cards_disprove(disprove_player)
-                            card_choosen = raw_input("Enter card to disprove: ")
-                            self.disprove_suggestion(disprove_player,card_choosen)
-                            break
- 
+                        else:
+                            if self.check_disprove_suggestion(disprove_player) == True:
+                                print self.available_cards_disprove(disprove_player)
+                                card_choosen = raw_input("Enter card to disprove: ")
+                                self.disprove_suggestion(disprove_player,card_choosen)
+                                break
+                else:
+                    print "You are not in a room and can't make a suggestion. Please move to a room."
+                    
             elif user_choice == "3":
                 suspect = raw_input("Enter a suspect: ")
                 weapon = raw_input("Enter a weapon: ")
                 room = raw_input("Enter a room: ")
                 self.make_accusation(room,suspect,weapon)
+                self.active_player.move_status = False
                 self.__set_active_player()
-                
+            
             elif user_choice == "4":
+               print "Your hand is:"
+               for card in self.active_player.get_hand.values():
+                print card
+            
+            elif user_choice == "5":
+                self.active_player.move_status = False
                 self.__set_active_player()
             
             
