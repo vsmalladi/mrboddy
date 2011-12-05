@@ -12,15 +12,19 @@ from gamerules import GameRules
 def main():
     
    current_game = Game()
-   #get the number of players and set up characters
-   Player1 = Player("Player1")
-   Player2 = Player("Player2")
-   Player3 = Player("Player3")
-   Player1.position = "Hall-Lounge"
-   Player2.position = "Lounge-Dining"
-   Player3.position = "Ballroom-Kitchen"
-   players = [Player1,Player2,Player3]
-   current_game.initialize(players)
+   while True:
+      num_players = int(raw_input("Enter the number of players (3-6): "))
+      if num_players >=3:
+         break
+      else:
+         print "Please enter a number between 3-6"
+
+   
+   for i in range(1,num_players):
+      player_name = raw_input("Enter the name for Player %s " % (i))
+      current_game.add_player(player_name)
+   
+   current_game.initialize()
    #gameplay loop
    current_game.game_play()
     
