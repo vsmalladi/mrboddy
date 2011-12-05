@@ -350,8 +350,10 @@ class Game(object):
         This is the main game loop that would be
         called by playgame moduel
         """
+        
+        
         while self.__game_status == True:
-            print "It is %s turn (%s)." % (self.active_player.get_name,self.active_player.get_character)
+            print "It is %s's turn (%s)." % (self.active_player.get_name,self.active_player.get_character)
             print "=== Menu ==="
             print "1. Make Movement"
             print "2. Make Suggestion"
@@ -364,30 +366,35 @@ class Game(object):
             
             user_choice = raw_input("Choose an option from the menu: ")
             if user_choice == "1":
+                os.system('clear')
                 if self.active_player.get_move_status == False:
                     new_room = raw_input("Enter the name of the room you will move to: ")
                     self.make_move(new_room)
                     self.active_player.move_status = True
+                    print "\n"
                 
                 else:
-                    print "Your have already moved this turn"
+                    print "Your have already moved this turn\n"
             
             elif user_choice == "2":
+                os.system('clear')
                 if self.active_player.get_suggest_status == True :
-                    print "You have already made a suggestion this round."
+                    print "You have already made a suggestion this round.\n"
                     
                 elif self.active_player.get_position in self.__room_dict.values():
                     suspect = raw_input("Enter a suspect: ")
                     weapon = raw_input("Enter a weapon: ")
                     self.make_suggestion(suspect,weapon)
                     self.active_player.suggest_status = True
+                    print "\n"
                     
                     disprove_player_list = self.__set_disprove_player_order()
 
                     for disprove_player in reversed(disprove_player_list):
                         print disprove_player.get_name
+                        print "\n"
                         if disprove_player == self.active_player:
-                            print "No one can disprove the suggestion"
+                            print "No one can disprove the suggestion\n"
                             break
                         else:
                             if self.check_disprove_suggestion(disprove_player) == True:
@@ -396,9 +403,10 @@ class Game(object):
                                 self.disprove_suggestion(disprove_player,card_choosen)
                                 break
                 else:
-                    print "You are not in a room and can't make a suggestion. Please move to a room."
+                    print "You are not in a room and can't make a suggestion. Please move to a room.\n"
                     
             elif user_choice == "3":
+                os.system('clear')
                 suspect = raw_input("Enter a suspect: ")
                 weapon = raw_input("Enter a weapon: ")
                 room = raw_input("Enter a room: ")
@@ -408,25 +416,32 @@ class Game(object):
                 self.__set_active_player()
             
             elif user_choice == "4":
-               print "Your hand is:"
-               for card in self.active_player.get_hand.values():
-                print card
+                os.system('clear')
+                print "Your hand is:"
+                for card in self.active_player.get_hand.values():
+                    print card
+                print "\n"
+                
             
             elif user_choice == "5":
-                print "Your current position is: %s" % (self.active_player.get_position)
+                os.system('clear')
+                print "Your current position is: %s\n" % (self.active_player.get_position)
             
             elif user_choice == "6":
+                os.system('clear')
                 print "The rooms are: "
                 for room in self.game_board.get_rooms:
                     print room
+                print "\n"
                     
             elif user_choice == "7":
+                os.system('clear')
                 self.active_player.move_status = False
                 self.active_player.suggest_status = False
                 self.__set_active_player()
                 
             elif user_choice == "8":
-                
+                os.system('clear')
                 for p in self.players:
                     if self.active_player == p:
                         self.players.remove(p)
