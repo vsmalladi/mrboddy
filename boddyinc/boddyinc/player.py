@@ -10,6 +10,7 @@ class Player(object):
         self.inplay = True
         self.hand = {}
         self.name = name
+        self.move_status = False
     
     @property
     def get_name(self):
@@ -67,3 +68,11 @@ class Player(object):
         Player reveals a particular card to disprove some suggestion
         """
         return self.hand[card_name]
+    
+    @property
+    def get_move_status(self):
+        """
+        Returns if the play has moved in this turn already or not
+        """
+        return self.move_status
+    
