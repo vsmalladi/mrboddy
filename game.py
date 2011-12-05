@@ -356,7 +356,9 @@ class Game(object):
             print "2. Make Suggestion"
             print "3. Make Accusation"
             print "4. Show cards"
-            print "5. End Turn"
+            print "5. Show current position"
+            print "6. List places on board"
+            print "7. End Turn"
             
             user_choice = raw_input("Choose an option from the menu: ")
             if user_choice == "1":
@@ -403,6 +405,14 @@ class Game(object):
                for card in self.active_player.get_hand.values():
                 print card
             
+            elif user_choice == "5":
+                print "Your current position is: %s" % (self.active_player.get_position)
+            
+            elif user_choice == "6":
+                print "The rooms are: "
+                for room in self.game_board.get_rooms:
+                    print room
+                    
             elif user_choice == "5":
                 self.active_player.move_status = False
                 self.__set_active_player()
