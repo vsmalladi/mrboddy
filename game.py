@@ -432,9 +432,30 @@ class Game(object):
                     
             elif user_choice == "3":
                 os.system('clear')
-                suspect = raw_input("Enter a suspect: ")
-                weapon = raw_input("Enter a weapon: ")
-                room = raw_input("Enter a room: ")
+                
+                for j in range(0,6):
+                    print "%s. %s" % (j+1,character_list[j])
+                         
+                suspect_choice = int(raw_input("Choose a suspect: "))
+                    
+                os.system('clear')
+                
+                for k in range(0,6):
+                         print "%s. %s" % (k+1,weapon_list[k])
+                    
+                weapon_choice = int(raw_input("Choose a weapon: "))
+                os.system('clear')
+                
+                for l in range(0,9):
+                    print "%s. %s" % (l+1,room_list[l])
+                    
+                room_choice = int(raw_input("Choose a room: "))
+                os.system('clear')
+                
+                
+                suspect = character_list[suspect_choice-1]
+                weapon = weapon_list[weapon_choice-1]
+                room = room_list[room_choice-1]
                 self.make_accusation(room,suspect,weapon)
                 self.active_player.move_status = False
                 self.active_player.suggest_status = False
