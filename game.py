@@ -350,6 +350,7 @@ class Game(object):
         This is the main game loop that would be
         called by playgame moduel
         """
+        character_list = self.__character_dict.values()
         weapon_list = self.__weapon_dict.values()
         room_list = self.__room_dict.values()
         rooms_board = self.game_board.get_rooms
@@ -387,8 +388,22 @@ class Game(object):
                     print "You have already made a suggestion this round.\n"
                     
                 elif self.active_player.get_position in self.__room_dict.values():
-                    suspect = raw_input("Enter a suspect: ")
-                    weapon = raw_input("Enter a weapon: ")
+                    for j in range(0,6):
+                         print "%s. %s" % (j+1,character_list[j])
+                         
+                    suspect_choice = int(raw_input("Choose a suspect: "))
+                    
+                    os.system('clear')
+                    
+                    for k in range(0,6):
+                         print "%s. %s" % (k+1,weapon_list[k])
+                    
+                    weapon_choice = int(raw_input("Choose a weapon: "))
+                    
+                    suspect = character_list[suspect_choice-1]
+                    weapon = weapon_list[weapon_choice-1]
+                    print "\n"
+                    
                     self.make_suggestion(suspect,weapon)
                     self.active_player.suggest_status = True
                     print "\n"
@@ -396,15 +411,20 @@ class Game(object):
                     disprove_player_list = self.__set_disprove_player_order()
 
                     for disprove_player in reversed(disprove_player_list):
-                        print disprove_player.get_name
+                        
                         print "\n"
                         if disprove_player == self.active_player:
                             print "No one can disprove the suggestion\n"
                             break
                         else:
                             if self.check_disprove_suggestion(disprove_player) == True:
-                                print self.available_cards_disprove(disprove_player)
-                                card_choosen = raw_input("Enter card to disprove: ")
+                                print "Player %s may disprove suggestion with the following cards." % (disprove_player.get_name)
+                                disprove = self.available_cards_disprove(disprove_player).values()
+                                for i in (0,(len(disprove)-1)):
+                                    print "%s. %s" % (i+1,disprove[i])
+                                    
+                                card_choice = int(raw_input("Choose a card to disprove suggestion: "))
+                                card_choosen = disprove[card_choice-1]
                                 self.disprove_suggestion(disprove_player,card_choosen)
                                 break
                 else:
