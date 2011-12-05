@@ -9,6 +9,7 @@ class Player(object):
         self.hand = {}
         self.name = name
         self.move_status = False
+        self.suggest_status = False
     
     @property
     def get_name(self):
@@ -66,6 +67,13 @@ class Player(object):
         Returns if the player has already moved that turn
         """
         return self.move_status
+    
+    @property
+    def get_suggest_status(self):
+        """
+        Returns if the player has already made a suggestion this turn
+        """
+        return self.suggest_status
         
         
         

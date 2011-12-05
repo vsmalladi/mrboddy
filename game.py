@@ -371,11 +371,15 @@ class Game(object):
                     print "Your have already moved this turn"
             
             elif user_choice == "2":
-                if self.active_player.get_position in self.__room_dict.values():
+                if self.active_player.get_suggest_status == True :
+                    print "You have already made a suggestion this round."
+                    
+                elif self.active_player.get_position in self.__room_dict.values():
                     suspect = raw_input("Enter a suspect: ")
                     weapon = raw_input("Enter a weapon: ")
                     self.make_suggestion(suspect,weapon)
-                
+                    self.active_player.suggest_status = True
+                    
                     disprove_player_list = self.__set_disprove_player_order()
 
                     for disprove_player in reversed(disprove_player_list):
@@ -398,6 +402,7 @@ class Game(object):
                 room = raw_input("Enter a room: ")
                 self.make_accusation(room,suspect,weapon)
                 self.active_player.move_status = False
+                self.active_player.suggest_status = False
                 self.__set_active_player()
             
             elif user_choice == "4":
@@ -415,6 +420,7 @@ class Game(object):
                     
             elif user_choice == "7":
                 self.active_player.move_status = False
+                self.active_player.suggest_status = False
                 self.__set_active_player()
             
             
