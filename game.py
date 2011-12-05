@@ -350,7 +350,9 @@ class Game(object):
         This is the main game loop that would be
         called by playgame moduel
         """
-        
+        weapon_list = self.__weapon_dict.values()
+        room_list = self.__room_dict.values()
+        rooms_board = self.game_board.get_rooms
         
         while self.__game_status == True:
             print "It is %s's turn (%s)." % (self.active_player.get_name,self.active_player.get_character)
@@ -368,7 +370,10 @@ class Game(object):
             if user_choice == "1":
                 os.system('clear')
                 if self.active_player.get_move_status == False:
-                    new_room = raw_input("Enter the name of the room you will move to: ")
+                    for i in range(0,21):
+                        print "%s. %s" % (i+1,rooms_board[i])
+                    choice = int(raw_input("Enter the number of the room you will move to: "))
+                    new_room = rooms_board[choice-1]
                     self.make_move(new_room)
                     self.active_player.move_status = True
                     print "\n"
@@ -430,7 +435,7 @@ class Game(object):
             elif user_choice == "6":
                 os.system('clear')
                 print "The rooms are: "
-                for room in self.game_board.get_rooms:
+                for room in rooms_board:
                     print room
                 print "\n"
                     
