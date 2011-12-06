@@ -375,8 +375,9 @@ class Game(object):
                         print "%s. %s" % (i+1,rooms_board[i])
                     choice = int(raw_input("Enter the number of the room you will move to: "))
                     new_room = rooms_board[choice-1]
-                    self.make_move(new_room)
-                    self.active_player.move_status = True
+                    move_valid = self.make_move(new_room)
+                    if move_valid == True:
+                        self.active_player.move_status = True
                     print "\n"
                 
                 else:
@@ -420,8 +421,8 @@ class Game(object):
                             if self.check_disprove_suggestion(disprove_player) == True:
                                 print "Player %s may disprove suggestion with the following cards." % (disprove_player.get_name)
                                 disprove = self.available_cards_disprove(disprove_player).values()
-                                for i in (0,(len(disprove)-1)):
-                                    print "%s. %s" % (i+1,disprove[i])
+                                for c in range(0,len(disprove)):
+                                    print "%s. %s" % (c+1,disprove[c])
                                     
                                 card_choice = int(raw_input("Choose a card to disprove suggestion: "))
                                 card_choosen = disprove[card_choice-1]
